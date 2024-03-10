@@ -1,34 +1,31 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from "react-native";
 import { useFonts } from "expo-font";
-import LoginScreen from './App/Screen/LoginScreen';
-import {ClerkProvider, SignedIn, SignedOut} from "@clerk/clerk-expo"
+import {Provider} from "react-redux"
+import Store from "./redux/store";
+import RootNavigation from "./Navigation/navigation";
+
 
 export default function App() {
   const [fontsLaded] = useFonts({
-    'outfit': require('./assets/Fonts/Outfit-Regular.ttf'),
-    'outfit-bold': require('./assets/Fonts/Outfit-Bold.ttf'),
-    'outfit-light': require('./assets/Fonts/Outfit-Light.ttf'),
-    'outfit-semibold': require('./assets/Fonts/Outfit-SemiBold.ttf'),
-  })
-  return (
-    <ClerkProvider publishableKey='pk_test_aHVtb3JvdXMtcGlnbGV0LTQ5LmNsZXJrLmFjY291bnRzLmRldiQ
-'>
-      <View style={styles.container}>
+    outfit: require("./assets/Fonts/Outfit-Regular.ttf"),
+    "outfit-bold": require("./assets/Fonts/Outfit-Bold.ttf"),
+    "outfit-light": require("./assets/Fonts/Outfit-Light.ttf"),
+    "outfit-semibold": require("./assets/Fonts/Outfit-SemiBold.ttf"),
+  });
 
-     <SignedIn>
-          <Text>You are Signed in</Text>
-        </SignedIn>
-        <SignedOut>
-        <LoginScreen />
-        </SignedOut>
+
+  return (
+  <Provider store={Store}>
+      <View style={styles.container}>
+     <RootNavigation />
     </View>
-    </ClerkProvider>
+  </Provider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: "#fff",
   },
 });

@@ -1,26 +1,11 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import Colors from "../utils/Colors";
-import * as WebBrowser from "expo-web-browser";
-WebBrowser.maybeCompleteAuthSession();
-import { useOAuth } from "@clerk/clerk-expo";
+import { AntDesign } from "@expo/vector-icons";
 
-export default function LoginScreen() {
-
-    useWarmUpBrowser();
- 
-  const { startOAuthFlow } = useOAuth({ strategy: "oauth_google" });
- 
+export default function GetStarted({navigation}) {
   const onPress = React.useCallback(async () => {
     try {
-      const { createdSessionId, signIn, signUp, setActive } =
-        await startOAuthFlow();
- 
-      if (createdSessionId) {
-        setActive({ session: createdSessionId });
-      } else {
-        // Use signIn or signUp for next steps such as MFA
-      }
     } catch (err) {
       console.error("OAuth error", err);
     }
@@ -39,11 +24,19 @@ export default function LoginScreen() {
           marginTop: -70,
           padding: 20,
           display: "flex",
-            alignItems:"center"
+          alignItems: "center",
         }}
       >
-         <Text style={{fontSize:50,color: Colors.WHITE,
-            fontFamily: "outfit", fontWeight:"900"}}>{"</>"}</Text>
+        <Text
+          style={{
+            fontSize: 50,
+            color: Colors.WHITE,
+            fontFamily: "outfit",
+            fontWeight: "900",
+          }}
+        >
+          {"</>"}
+        </Text>
         <Text
           style={{
             textAlign: "center",
@@ -73,28 +66,23 @@ export default function LoginScreen() {
             alignItems: "center",
             gap: 10,
             justifyContent: "center",
-            borderRadius: 99, padding:10,
-            marginTop:25,
+            borderRadius: 99,
+            padding: 12,
+            marginTop: 25,
           }}
+          onPress={() => navigation.navigate("Login")}
         >
-          <Image
-            source={require("../../assets/images/googlIcon.png")}
-            style={{
-              width: 40,
-              height: 40,
-            }}
-          />
           <Text
             style={{
               fontSize: 20,
               color: Colors.PRIMARY,
               fontFamily: "outfit",
-              fontWeight:"600",
-              paddingRight:10
+              fontWeight: "800",
             }}
           >
-           Login with Google
+            Get Started
           </Text>
+          <AntDesign name="rightcircle" size={28} color="black" />
         </TouchableOpacity>
       </View>
     </View>
