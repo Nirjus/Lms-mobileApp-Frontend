@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     paddingRight: 17,
     height: 46,
     borderRadius: 99,
-    width: 300,
+    width:"80%"
   },
   modalContainer: {
     flex: 1,
