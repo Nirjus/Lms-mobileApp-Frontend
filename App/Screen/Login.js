@@ -1,15 +1,27 @@
 import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
 import React, { useState } from "react";
-import SubmitButton from "../../components/Forms/SubmitButton.js";
-import Colors from "../utils/Colors.js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-export default function Login({ navigation }) {
+import SubmitButton from "../../components/Forms/SubmitButton.js";
+import Colors from "../utils/Colors.js";
+import { useNavigation } from "@react-navigation/native";
+
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-
+  const navigation = useNavigation();
+  const setUserInfo = async (data) => {
+    await AsyncStorage.setItem("@auth", JSON.stringify(data.user));
+    await AsyncStorage.setItem("@token", data.token);
+    dispatch({
+      type: "LOGIN_USER",
+      user: data.user,
+      token: data.token,
+    });
+  };
   const submitHandler = async () => {
     try {
       setLoading(true);
@@ -26,12 +38,8 @@ export default function Login({ navigation }) {
         })
         .then((res) => {
           alert(res.data.message);
-          dispatch({
-            type: "LOAD_USER",
-            user: res.data.loginUser,
-          })
-
-          navigation.navigate("TabNavigation")
+          setUserInfo(res.data);
+          navigation.navigate("BottomTabs");
         })
         .catch((error) => {
           alert(error.response.data.message);

@@ -1,62 +1,53 @@
-import GetStarted from "../App/Screen/GetStarted";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
-import Login from "../App/Screen/Login";
-import Registration from "../App/Screen/Registration";
-import Home from "../App/Screen/Home";
-import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import TabNavigation from "./TabNavigation";
+import Login from "../App/Screen/Login";
+import GetStarted from "../App/Screen/GetStarted";
+import Registration from "../App/Screen/Registration";
+import TabNavigation from "../App/Screen/TabNavigation";
+import CourseDetails from "../App/Screen/Courses/CourseDetails";
+import ChapterContent from "../App/Screen/Courses/ChapterContent";
 
 const RootNavigation = () => {
   const Stack = createNativeStackNavigator();
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.user);
+
   React.useEffect(() => {
     const getuser = async () => {
-      await axios
-        .get("/user/me")
-        .then((res) => {
-          dispatch({
-            type: "LOAD_USER",
-            user: res.data.user,
-          });
-        })
-        .catch((error) => {
-          alert(error.response.data.message);
-        });
+      let data = await AsyncStorage.getItem("@auth");
+      let token = await AsyncStorage.getItem("@token");
+
+      let loginData = JSON.parse(data);
+
+      dispatch({
+        type: "LOAD_USER",
+        user: loginData,
+        token: token,
+      });
     };
     getuser();
-  }, []);
-
-  const { user } = useSelector((state) => state.user);
+  }, [user]);
 
   return (
     <NavigationContainer>
-     
-          <Stack.Navigator initialRouteName="GetStarted" screenOptions={{headerShown:false}}>
-            {
-              user ? (
-              <Stack.Screen name="TabNavigation" component={TabNavigation} />
-            
-              ) : (
-                <>
-               <Stack.Screen
-              name="GetStarted"
-              component={GetStarted}
-            />
-            <Stack.Screen
-              name="Login"
-              component={Login}
-            />
-            <Stack.Screen
-              name="Registration"
-              component={Registration}
-            />
-                </>
-              )
-            }
-          </Stack.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {user ? (
+          <>
+            <Stack.Screen name="BottomTabs" component={TabNavigation} />
+            <Stack.Screen name="CourseDetails" component={CourseDetails} />
+            <Stack.Screen name="ChapterContent" component={ChapterContent} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="GetStarted" component={GetStarted} />
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="Registration" component={Registration} />
+          </>
+        )}
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };

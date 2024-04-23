@@ -6,11 +6,14 @@ import {
   TextInput,
   TouchableOpacity,
   Modal,
+  ScrollView,
+  Animated,
 } from "react-native";
-import React from "react";
+import React, { useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Colors from "../utils/Colors";
 import axios from "axios";
 import { useDispatch } from "react-redux";
@@ -21,33 +24,51 @@ const Header = ({ user }) => {
   const togglePopup = () => {
     setPopup(!popup);
   };
-
+  const logoutParsist = async () => {
+    await AsyncStorage.removeItem("@auth");
+    await AsyncStorage.removeItem("@token");
+  };
   const logoutHandler = async () => {
     await axios.get("/user/logout", { withCredentials: true }).then((res) => {
-        setPopup(!popup)
-        dispatch({
-            type: "LOAD_USER",
-            user: undefined
-        })
+      setPopup(!popup);
+      dispatch({
+        type: "LOAD_USER",
+        user: undefined,
+        token: "",
+      });
+      logoutParsist();
     });
   };
+
   return (
     <View>
       <View style={styles.container}>
         <View style={styles.subContainer}>
           <TouchableOpacity onPress={() => togglePopup()}>
-            <Image
-              source={{ uri: user?.avatar }}
-              style={{
-                width: 50,
-                height: 50,
-                objectFit: "cover",
-                borderRadius: 99,
-              }}
-            />
+            {user?.avatar?.url ? (
+              <Image
+                source={{ uri: user?.avatar?.url }}
+                style={{
+                  width: 50,
+                  height: 50,
+                  objectFit: "cover",
+                  borderRadius: 99,
+                }}
+              />
+            ) : (
+              <Image
+                source={require("../../assets/images/pngegg.png")}
+                style={{
+                  width: 50,
+                  height: 50,
+                  objectFit: "cover",
+                  borderRadius: 99,
+                }}
+              />
+            )}
           </TouchableOpacity>
           <View>
-            <Text style={{ color: Colors.WHITE }}>Welcome</Text>
+            <Text style={{ color: "#d3d3d3" }}>Welcome</Text>
             <Text
               style={{
                 color: Colors.WHITE,
@@ -88,7 +109,7 @@ const Header = ({ user }) => {
               style={[
                 styles.subContainer,
                 {
-                  backgroundColor: Colors.LIGHT_PRIMARY,
+                  backgroundColor: "#db1818",
                   justifyContent: "space-between",
                   borderRadius: 5,
                   padding: 10,
@@ -104,7 +125,7 @@ const Header = ({ user }) => {
                 styles.subContainer,
                 {
                   marginTop: 20,
-                  backgroundColor: Colors.LIGHT_PRIMARY,
+                  backgroundColor: "#000",
                   justifyContent: "space-between",
                   borderRadius: 5,
                   padding: 10,
@@ -148,7 +169,7 @@ const styles = StyleSheet.create({
     paddingRight: 17,
     height: 46,
     borderRadius: 99,
-    width:"80%"
+    width: "80%",
   },
   modalContainer: {
     flex: 1,

@@ -3,7 +3,7 @@ import React from "react";
 import Colors from "../utils/Colors";
 import { AntDesign } from "@expo/vector-icons";
 
-export default function GetStarted({navigation}) {
+export default function GetStarted({ navigation }) {
   const onPress = React.useCallback(async () => {
     try {
     } catch (err) {
@@ -11,17 +11,24 @@ export default function GetStarted({navigation}) {
     }
   }, []);
   return (
-    <View style={{ display: "flex", alignItems: "center" }}>
-      <Image
-        source={require("../../assets/images/home 1.png")}
-        style={{ height: 500, width: 250, marginTop: 50, objectFit: "contain" }}
-      />
+    <View style={{ flex: 1, alignItems: "center" }}>
+      <View style={{ overflow: "hidden", height: "50%" }}>
+        <Image
+          source={require("../../assets/images/home 1.png")}
+          style={{
+            height: "100%",
+            width: 250,
+            marginTop: 80,
+            objectFit: "contain",
+          }}
+        />
+      </View>
       <View
         style={{
-          height: 500,
+          height: "60%",
           backgroundColor: Colors.PRIMARY,
           width: "100%",
-          marginTop: -70,
+          // marginTop: -70,
           padding: 20,
           display: "flex",
           alignItems: "center",
