@@ -1,7 +1,15 @@
-import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  ToastAndroid,
+  View,
+} from "react-native";
 import React, { useEffect, useState } from "react";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
+import { Ionicons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import RazorpayCheckout from "react-native-razorpay";
 import Header from "../../Components/Common/Header";
@@ -13,7 +21,7 @@ import Loader from "../../Components/Loader";
 
 const CourseDetails = () => {
   const { params } = useRoute();
-
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
 
   const [isEnrolled, setEnrolled] = useState(false);
@@ -55,6 +63,7 @@ const CourseDetails = () => {
           {
             courseId: course?._id,
             courseName: course?.name,
+            course: course,
             price: course?.price,
             paymentMode: paymentMode,
             paymentId: paymentId,
@@ -138,10 +147,32 @@ const CourseDetails = () => {
     };
     checkMemberShip();
   }, [memberExists]);
+  const onchapterPress = () => {
+    if (!isEnrolled) {
+      ToastAndroid.show("Please Enroll Course!", ToastAndroid.LONG);
+      return;
+    } else {
+      navigation.navigate("ChapterContent", {
+        course: course,
+        isEnrolled: isEnrolled,
+      });
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
-      <Header title={"Course Details"} />
+      <Header
+        title={"Course Details"}
+        isLeft
+        component={
+          <TouchableOpacity
+            activeOpacity={0.5}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back-circle" size={40} color="black" />
+          </TouchableOpacity>
+        }
+      />
       <ScrollView showsVerticalScrollIndicator={false}>
         <CourseInfo course={course} />
         {/* {Sourse section} */}
@@ -151,10 +182,20 @@ const CourseDetails = () => {
           course={course}
           isEnrolled={isEnrolled}
           isMember={isMember}
+          continueOnCourse={() =>
+            navigation.navigate("ChapterContent", {
+              course: course,
+              isEnrolled: isEnrolled,
+            })
+          }
           checkEnrollingOfCourse={checkEnrollingOfCourse}
         />
         {/* {Lessons Sections} */}
-        <LessonsSection course={course} isEnrolled={isEnrolled} />
+        <LessonsSection
+          course={course}
+          isEnrolled={isEnrolled}
+          onChapterSelect={() => onchapterPress()}
+        />
       </ScrollView>
       <Loader visible={loading} />
     </View>

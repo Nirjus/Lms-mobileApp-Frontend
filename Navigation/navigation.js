@@ -9,6 +9,10 @@ import Registration from "../App/Screen/Registration";
 import TabNavigation from "../App/Screen/TabNavigation";
 import CourseDetails from "../App/Screen/Courses/CourseDetails";
 import ChapterContent from "../App/Screen/Courses/ChapterContent";
+import MyCourses from "../App/Screen/User/myCourses";
+import CategoryPage from "../App/Screen/CategoryPage";
+import EditeProfile from "../App/Screen/User/EditeProfile";
+import Membership from "../App/Screen/User/Membership";
 
 const RootNavigation = () => {
   const Stack = createNativeStackNavigator();
@@ -39,6 +43,10 @@ const RootNavigation = () => {
             <Stack.Screen name="BottomTabs" component={TabNavigation} />
             <Stack.Screen name="CourseDetails" component={CourseDetails} />
             <Stack.Screen name="ChapterContent" component={ChapterContent} />
+            <Stack.Screen name="MyCourses" component={MyCourses} />
+            <Stack.Screen name="CategoryPage" component={CategoryPage} />
+            <Stack.Screen name="EditeProfile" component={EditeProfile} />
+            <Stack.Screen name="Membership" component={Membership} />
           </>
         ) : (
           <>

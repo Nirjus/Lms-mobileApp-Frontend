@@ -17,10 +17,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Colors from "../utils/Colors";
 import axios from "axios";
 import { useDispatch } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 
 const Header = ({ user }) => {
   const [popup, setPopup] = React.useState(false);
   const dispatch = useDispatch();
+  const navigation = useNavigation();
   const togglePopup = () => {
     setPopup(!popup);
   };
@@ -85,7 +87,7 @@ const Header = ({ user }) => {
             source={require("../../assets/images/coin.png")}
             style={{ width: 35, height: 35, objectFit: "contain" }}
           />
-          <Text style={{ color: Colors.WHITE }}>5620</Text>
+          <Text style={{ color: Colors.WHITE }}>{user?.point}</Text>
         </View>
       </View>
 
@@ -121,6 +123,14 @@ const Header = ({ user }) => {
               <MaterialIcons name="logout" size={22} color="white" />
             </TouchableOpacity>
             <TouchableOpacity
+              onPress={() => {
+                if (!user) {
+                  alert("Please SignIn first");
+                } else {
+                  navigation.navigate("BottomTabs", { screen: "Profile" });
+                  setPopup(false);
+                }
+              }}
               style={[
                 styles.subContainer,
                 {

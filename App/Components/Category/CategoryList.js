@@ -8,9 +8,12 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import SectionHeading from "../SectionHeading";
+import { useNavigation } from "@react-navigation/native";
 
 const CategoryList = ({ categorylist }) => {
   const [activeCategory, setActiveCategory] = useState();
+  const navigation = useNavigation();
+
   return (
     <View>
       <SectionHeading title={"Category"} color="#fff" size={20} />
@@ -30,6 +33,7 @@ const CategoryList = ({ categorylist }) => {
             ]}
             onPress={() => {
               setActiveCategory(index);
+              navigation.navigate("CategoryPage", { data: item });
             }}
           >
             <Image

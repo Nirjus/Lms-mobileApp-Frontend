@@ -7,6 +7,7 @@ const EnrollCourse = ({
   isEnrolled,
   isMember,
   checkEnrollingOfCourse,
+  continueOnCourse,
 }) => {
   const returnPrice = () => {
     if (isMember) {
@@ -19,6 +20,7 @@ const EnrollCourse = ({
     <>
       {isEnrolled ? (
         <TouchableOpacity
+          onPress={() => continueOnCourse()}
           activeOpacity={0.4}
           style={{
             margin: 15,

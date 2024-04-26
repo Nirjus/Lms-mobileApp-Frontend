@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
-import { Ionicons } from "@expo/vector-icons";
+
 import { useNavigation } from "@react-navigation/native";
-const Header = ({ title }) => {
+const Header = ({ title, isLeft = false, component }) => {
   const navigation = useNavigation();
 
   return (
@@ -17,9 +17,9 @@ const Header = ({ title }) => {
         justifyContent: "space-between",
       }}
     >
-      <TouchableOpacity activeOpacity={0.5} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back-circle" size={40} color="black" />
-      </TouchableOpacity>
+      <View style={{ width: 40, height: 40 }}>
+        {isLeft && <>{component}</>}
+      </View>
       <Text
         style={{
           fontFamily: "outfit-bold",
@@ -29,7 +29,7 @@ const Header = ({ title }) => {
       >
         {title}
       </Text>
-      <View style={{ width: 40 }}></View>
+      <View style={{ width: 40, height: 40 }}></View>
     </View>
   );
 };
