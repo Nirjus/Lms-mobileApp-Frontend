@@ -13,6 +13,9 @@ import MyCourses from "../App/Screen/User/myCourses";
 import CategoryPage from "../App/Screen/CategoryPage";
 import EditeProfile from "../App/Screen/User/EditeProfile";
 import Membership from "../App/Screen/User/Membership";
+import CourseCompletionSuccess from "../App/Screen/Courses/CourseCompletionSuccess";
+import Achivements from "../App/Screen/User/Achivements";
+import Search from "../App/Screen/Search";
 
 const RootNavigation = () => {
   const Stack = createNativeStackNavigator();
@@ -47,6 +50,12 @@ const RootNavigation = () => {
             <Stack.Screen name="CategoryPage" component={CategoryPage} />
             <Stack.Screen name="EditeProfile" component={EditeProfile} />
             <Stack.Screen name="Membership" component={Membership} />
+            <Stack.Screen
+              name="CourseCompletionSuccess"
+              component={CourseCompletionSuccess}
+            />
+            <Stack.Screen name="Achivements" component={Achivements} />
+            <Stack.Screen name="Search" component={Search} />
           </>
         ) : (
           <>

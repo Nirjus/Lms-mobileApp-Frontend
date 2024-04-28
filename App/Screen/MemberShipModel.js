@@ -301,7 +301,7 @@ const MemberShipModel = ({ open, onClose }) => {
               style={{
                 color: "#989898",
                 textAlign: "center",
-                fontSize: 16,
+                fontSize: 14,
                 fontFamily: "outfit",
                 marginTop: 10,
               }}
@@ -312,7 +312,7 @@ const MemberShipModel = ({ open, onClose }) => {
               style={{
                 color: "#989898",
                 textAlign: "center",
-                fontSize: 16,
+                fontSize: 14,
                 fontFamily: "outfit",
                 marginTop: 10,
               }}

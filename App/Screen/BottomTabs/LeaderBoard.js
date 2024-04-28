@@ -9,10 +9,10 @@ import {
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import Colors from "../utils/Colors";
-import GoldMedel from "../../assets/images/first.png";
-import SilverMedal from "../../assets/images/second.png";
-import BronzeMedel from "../../assets/images/third.png";
+import Colors from "../../utils/Colors";
+import GoldMedel from "../../../assets/images/first.png";
+import SilverMedal from "../../../assets/images/second.png";
+import BronzeMedel from "../../../assets/images/third.png";
 const LeaderBoard = () => {
   const { token } = useSelector((state) => state.user);
   const [userList, setUserList] = useState([]);
@@ -93,7 +93,7 @@ const LeaderBoard = () => {
                 />
               ) : (
                 <Image
-                  source={require("../../assets/images/pngegg.png")}
+                  source={require("../../../assets/images/pngegg.png")}
                   style={{ width: 60, height: 60, borderRadius: 99 }}
                 />
               )}

@@ -4,10 +4,10 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { FontAwesome } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import Icon from "../Components/Icon";
-import Home from "./Home";
-import LeaderBoard from "./LeaderBoard";
-import Profile from "./Profile";
-import Courses from "./Courses";
+import Home from "./BottomTabs/Home";
+import LeaderBoard from "./BottomTabs/LeaderBoard";
+import Profile from "./BottomTabs/Profile";
+import Courses from "./BottomTabs/Courses";
 import * as Animatable from "react-native-animatable";
 
 const TabArr = [

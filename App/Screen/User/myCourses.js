@@ -13,7 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import ProgressCourse from "../../Components/Course/ProgressCourse";
-import Loader from "../../Components/Loader";
+
 const MyCourses = () => {
   const navigation = useNavigation();
   const { token } = useSelector((state) => state.user);
@@ -59,6 +59,7 @@ const MyCourses = () => {
       <FlatList
         data={myCourses}
         refreshing={isloading}
+        showsVerticalScrollIndicator={false}
         onRefresh={() => getAllEnrollCourses()}
         renderItem={({ item, index }) => (
           <ProgressCourse
@@ -68,7 +69,6 @@ const MyCourses = () => {
           />
         )}
       />
-      <Loader visible={isloading} />
     </View>
   );
 };

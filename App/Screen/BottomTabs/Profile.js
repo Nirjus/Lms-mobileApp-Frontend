@@ -7,13 +7,17 @@ import {
   Pressable,
   View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { MaterialIcons, Feather, FontAwesome6 } from "@expo/vector-icons";
+import {
+  MaterialIcons,
+  Feather,
+  FontAwesome6,
+  AntDesign,
+} from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
-import Header from "../Components/Common/Header";
+import Header from "../../Components/Common/Header";
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
-import Colors from "../utils/Colors";
+import Colors from "../../utils/Colors";
 
 const Profile = () => {
   const { user } = useSelector((state) => state.user);
@@ -52,7 +56,7 @@ const Profile = () => {
             <Image source={{ uri: userinfo?.avatar?.url }} style={styles.img} />
           ) : (
             <Image
-              source={require("../../assets/images/pngegg.png")}
+              source={require("../../../assets/images/pngegg.png")}
               style={styles.img}
             />
           )}
@@ -124,6 +128,15 @@ const Profile = () => {
               <MaterialIcons name="verified-user" size={22} color="#7a7a7a" />
               <Text style={{ color: "#7a7a7a", fontWeight: "700" }}>
                 Membership
+              </Text>
+            </Pressable>
+            <Pressable
+              style={styles.buttn}
+              onPress={() => navigation.navigate("Achivements")}
+            >
+              <AntDesign name="Trophy" size={24} color="#7a7a7a" />
+              <Text style={{ color: "#7a7a7a", fontWeight: "700" }}>
+                Achivements
               </Text>
             </Pressable>
           </View>

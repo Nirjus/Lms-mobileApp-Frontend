@@ -118,10 +118,11 @@ const styles = StyleSheet.create({
   courseCard: {
     backgroundColor: Colors.WHITE,
     // width: 260,
+    marginTop: 5,
     marginHorizontal: 20,
     padding: 10,
     borderRadius: 10,
     elevation: 2,
-    marginBottom: 10,
+    marginBottom: 5,
   },
 });

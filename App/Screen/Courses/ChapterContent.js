@@ -73,10 +73,7 @@ const ChapterContent = () => {
           });
           setUserInfo(res.data.user);
           if (course?.chapter?.length === res.data.chapterLength) {
-            Alert.alert(
-              "Congratulation",
-              `You successfully complete the course and earn ${res.data.user?.point} Points`
-            );
+            navigation.navigate("CourseCompletionSuccess");
           } else {
             ToastAndroid.showWithGravity(
               res.data.message,
@@ -194,6 +191,21 @@ const ChapterContent = () => {
                   </Text>
                 </Pressable>
               </View>
+              <TouchableOpacity
+                onPress={() => nextPage(index)}
+                style={styles.nextBtn}
+              >
+                <Text
+                  style={{
+                    color: Colors.WHITE,
+                    textAlign: "center",
+                    fontFamily: "outfit-semibold",
+                    fontSize: 16,
+                  }}
+                >
+                  {course?.chapter?.length <= index + 1 ? "Finish" : "Next"}
+                </Text>
+              </TouchableOpacity>
               <Pressable
                 style={{
                   flexDirection: "row",
@@ -289,21 +301,6 @@ const ChapterContent = () => {
                   isChapter
                 />
               )}
-              <TouchableOpacity
-                onPress={() => nextPage(index)}
-                style={styles.nextBtn}
-              >
-                <Text
-                  style={{
-                    color: Colors.WHITE,
-                    textAlign: "center",
-                    fontFamily: "outfit-semibold",
-                    fontSize: 16,
-                  }}
-                >
-                  {course?.chapter?.length <= index + 1 ? "Finish" : "Next"}
-                </Text>
-              </TouchableOpacity>
             </View>
           )}
           onScroll={handleScroll}

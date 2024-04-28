@@ -30,6 +30,10 @@ const Questions = ({ user, token, chapter, course }) => {
   const addQuestion = async () => {
     try {
       setLoading(true);
+      if (!question) {
+        setLoading(false);
+        return;
+      }
       await axios
         .put(
           `/course/add-question/${course?._id}?chapterId=${chapter?._id}`,

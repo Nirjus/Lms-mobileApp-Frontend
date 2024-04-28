@@ -8,8 +8,9 @@ import {
   Modal,
   ScrollView,
   Animated,
+  Pressable,
 } from "react-native";
-import React, { useRef } from "react";
+import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
@@ -91,10 +92,13 @@ const Header = ({ user }) => {
         </View>
       </View>
 
-      <View style={[styles.container, styles.searchBox]}>
-        <TextInput placeholder="Search Cources.." style={styles.input} />
+      <Pressable
+        onPress={() => navigation.navigate("Search")}
+        style={[styles.container, styles.searchBox]}
+      >
+        <Text style={styles.input}>Search here..</Text>
         <Ionicons name="search-circle-sharp" size={45} color={Colors.PRIMARY} />
-      </View>
+      </Pressable>
       <Modal
         transparent
         animationType="fade"
@@ -177,8 +181,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingLeft: 17,
     paddingRight: 17,
-    height: 46,
     borderRadius: 99,
+    color: "#989898",
     width: "80%",
   },
   modalContainer: {

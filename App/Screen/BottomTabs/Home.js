@@ -11,12 +11,12 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import DropDownPicker from "react-native-dropdown-picker";
 import { AntDesign } from "@expo/vector-icons";
-import Header from "../Components/Header";
-import Colors from "../utils/Colors";
-import CategoryList from "../Components/Category/CategoryList";
-import CourseList from "../Components/Course/CourseList";
-import SectionHeading from "../Components/SectionHeading";
-import CourseLebelItem from "../Components/Course/CourseLebelItem";
+import Header from "../../Components/Header";
+import Colors from "../../utils/Colors";
+import CategoryList from "../../Components/Category/CategoryList";
+import CourseList from "../../Components/Course/CourseList";
+import SectionHeading from "../../Components/SectionHeading";
+import CourseLebelItem from "../../Components/Course/CourseLebelItem";
 
 export default function Home() {
   const { user } = useSelector((state) => state.user);
