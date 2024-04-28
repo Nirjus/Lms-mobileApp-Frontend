@@ -23,6 +23,10 @@ const Sidebar = ({
         width: Dimensions.get("screen").width - 50,
         backgroundColor: "rgba(255,255,255,1)",
         padding: 0,
+        borderWidth: 1,
+        borderColor: "#96969686",
+        borderTopRightRadius: 10,
+        borderBottomRightRadius: 10,
       }}
     >
       <TouchableOpacity

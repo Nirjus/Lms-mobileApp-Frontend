@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   ToastAndroid,
   View,
+  Text,
+  Pressable,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -18,20 +20,34 @@ import SourceSection from "../../Components/Course/SourceSection";
 import EnrollCourse from "../../Components/Course/EnrollCourse";
 import LessonsSection from "../../Components/Course/LessonsSection";
 import Loader from "../../Components/Loader";
+import Colors from "../../utils/Colors";
+import ReviewSection from "../../Components/Course/ReviewSection";
 
 const CourseDetails = () => {
   const { params } = useRoute();
   const navigation = useNavigation();
+  const { update } = useSelector((state) => state.course);
   const [loading, setLoading] = useState(false);
-
+  const [page, setPage] = useState(1);
   const [isEnrolled, setEnrolled] = useState(false);
   const { token } = useSelector((state) => state.user);
   const { isMember: memberExists } = useSelector((state) => state.member);
-  const [course, setCourse] = useState();
+  const [course, setCourse] = useState(params?.data);
   const [isMember, setIsMember] = useState(false);
   useEffect(() => {
-    setCourse(params.data);
-  }, [params]);
+    const getCourse = async () => {
+      try {
+        await axios
+          .get(`/course/getCourse/${params?.data?._id}`)
+          .then((res) => {
+            setCourse(res.data.course);
+          });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getCourse();
+  }, [update]);
 
   useEffect(() => {
     const checkEnrollOrNot = async () => {
@@ -191,11 +207,55 @@ const CourseDetails = () => {
           checkEnrollingOfCourse={checkEnrollingOfCourse}
         />
         {/* {Lessons Sections} */}
-        <LessonsSection
-          course={course}
-          isEnrolled={isEnrolled}
-          onChapterSelect={() => onchapterPress()}
-        />
+        <Pressable
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 14,
+          }}
+        >
+          <Pressable
+            style={[
+              styles.btn,
+              page === 1
+                ? {
+                    borderBottomWidth: 2,
+                    borderBottomColor: "#727272",
+                  }
+                : {
+                    borderBottomWidth: 0,
+                  },
+            ]}
+            onPress={() => setPage(1)}
+          >
+            <Text style={styles.txt}>Lessons</Text>
+          </Pressable>
+          <Pressable
+            style={[
+              styles.btn,
+              page === 2
+                ? {
+                    borderBottomWidth: 2,
+                    borderBottomColor: "#727272",
+                  }
+                : {
+                    borderBottomWidth: 0,
+                  },
+            ]}
+            onPress={() => setPage(2)}
+          >
+            <Text style={styles.txt}>Reviews</Text>
+          </Pressable>
+        </Pressable>
+        {page === 1 && (
+          <LessonsSection
+            course={course}
+            isEnrolled={isEnrolled}
+            onChapterSelect={() => onchapterPress()}
+          />
+        )}
+        {page === 2 && <ReviewSection review={course?.reviews} />}
       </ScrollView>
       <Loader visible={loading} />
     </View>
@@ -204,4 +264,16 @@ const CourseDetails = () => {
 
 export default CourseDetails;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  btn: {
+    width: 100,
+    padding: 8,
+    borderBottomWidth: 0,
+  },
+  txt: {
+    fontFamily: "outfit",
+    fontSize: 15,
+    textAlign: "center",
+    color: Colors.BLACK,
+  },
+});

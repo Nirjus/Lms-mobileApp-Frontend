@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import Header from "../Components/Common/Header";
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+import Colors from "../utils/Colors";
 
 const Profile = () => {
   const { user } = useSelector((state) => state.user);
@@ -26,20 +27,27 @@ const Profile = () => {
   }, [user]);
   return (
     <View style={{ flex: 1 }}>
-      <Header
-        title={"Profile"}
-        isLeft
-        component={
-          <TouchableOpacity
-            activeOpacity={0.5}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back-circle" size={40} color="black" />
-          </TouchableOpacity>
-        }
-      />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={{ marginTop: 20 }}>
+      <View
+        style={{ height: 180, backgroundColor: Colors.PRIMARY, padding: 30 }}
+      >
+        <Text
+          style={{
+            fontFamily: "outfit-bold",
+            color: Colors.WHITE,
+            fontSize: 30,
+            textAlign: "center",
+
+            marginTop: 20,
+          }}
+        >
+          Profile
+        </Text>
+      </View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ marginTop: -60 }}
+      >
+        <View>
           {userinfo?.avatar?.url ? (
             <Image source={{ uri: userinfo?.avatar?.url }} style={styles.img} />
           ) : (
@@ -129,8 +137,8 @@ export default Profile;
 
 const styles = StyleSheet.create({
   img: {
-    height: 100,
-    width: 100,
+    height: 120,
+    width: 120,
     borderRadius: 100,
     resizeMode: "cover",
     alignSelf: "center",

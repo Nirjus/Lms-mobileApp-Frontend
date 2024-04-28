@@ -13,7 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import ProgressCourse from "../../Components/Course/ProgressCourse";
-
+import Loader from "../../Components/Loader";
 const MyCourses = () => {
   const navigation = useNavigation();
   const { token } = useSelector((state) => state.user);
@@ -21,7 +21,7 @@ const MyCourses = () => {
   const [isloading, setIsLoading] = useState(false);
   const getAllEnrollCourses = async () => {
     try {
-      setIsLoading(false);
+      setIsLoading(true);
       await axios
         .get("/enroll/getAll-enroll-course", {
           headers: {
@@ -68,6 +68,7 @@ const MyCourses = () => {
           />
         )}
       />
+      <Loader visible={isloading} />
     </View>
   );
 };

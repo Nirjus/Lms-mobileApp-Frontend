@@ -23,19 +23,33 @@ import Colors from "../../utils/Colors";
 import LessonsSection from "../../Components/Course/LessonsSection";
 import ProgressBar from "../../Components/Course/progressBar";
 import Sidebar from "../../Components/Course/Sidebar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import ReviewSection from "../../Components/Course/ReviewSection";
+import Questions from "../../Components/Course/Questions";
 
 const ChapterContent = () => {
   const { params } = useRoute();
-  const { token } = useSelector((state) => state.user);
+  const { token, user } = useSelector((state) => state.user);
+  const { update } = useSelector((state) => state.course);
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const flatListRef = useRef(null);
   const [userEnrollment, setUserEnrollment] = useState(params?.isEnrolled);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [page, setPage] = useState(1);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [course, setCourse] = useState(params?.course);
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+  const setUserInfo = async (data) => {
+    await AsyncStorage.setItem("@auth", JSON.stringify(data));
+
+    dispatch({
+      type: "LOAD_USER",
+      user: data,
+      token: token,
+    });
   };
   const onChapterComplete = async (item) => {
     try {
@@ -57,10 +71,11 @@ const ChapterContent = () => {
           dispatch({
             type: "UPDATE_ENROLLEMENT",
           });
+          setUserInfo(res.data.user);
           if (course?.chapter?.length === res.data.chapterLength) {
             Alert.alert(
               "Congratulation",
-              "You successfully complete the course"
+              `You successfully complete the course and earn ${res.data.user?.point} Points`
             );
           } else {
             ToastAndroid.showWithGravity(
@@ -95,6 +110,20 @@ const ChapterContent = () => {
     setActiveIndex(index + 1);
     flatListRef.current.scrollToIndex({ animated: true, index: index + 1 });
   };
+  useEffect(() => {
+    const getCourse = async () => {
+      try {
+        await axios
+          .get(`/course/getCourse/${params?.course?._id}`)
+          .then((res) => {
+            setCourse(res.data.course);
+          });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getCourse();
+  }, [update]);
   return (
     <View style={{ flex: 1 }}>
       <Header
@@ -165,20 +194,101 @@ const ChapterContent = () => {
                   </Text>
                 </Pressable>
               </View>
-              <View
-                style={[
-                  styles.contentSection,
-                  { backgroundColor: Colors.WHITE },
-                ]}
+              <Pressable
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 10,
+                }}
               >
-                <Text style={{ fontFamily: "outfit-semibold", fontSize: 15 }}>
-                  Content:
-                </Text>
-                <Text style={{ color: Colors.BLACK }}>{item?.content}</Text>
-              </View>
-              <View style={styles.contentSection}>
-                <Text style={{ color: Colors.BLACK }}>{item?.output}</Text>
-              </View>
+                <Pressable
+                  style={[
+                    styles.btn,
+                    page === 1
+                      ? {
+                          borderBottomWidth: 2,
+                          borderBottomColor: "#727272",
+                        }
+                      : {
+                          borderBottomWidth: 0,
+                        },
+                  ]}
+                  onPress={() => setPage(1)}
+                >
+                  <Text style={styles.txt}>Overview</Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.btn,
+                    page === 2
+                      ? {
+                          borderBottomWidth: 2,
+                          borderBottomColor: "#727272",
+                        }
+                      : {
+                          borderBottomWidth: 0,
+                        },
+                  ]}
+                  onPress={() => setPage(2)}
+                >
+                  <Text style={styles.txt}>Q&A</Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.btn,
+                    page === 3
+                      ? {
+                          borderBottomWidth: 2,
+                          borderBottomColor: "#727272",
+                        }
+                      : {
+                          borderBottomWidth: 0,
+                        },
+                  ]}
+                  onPress={() => setPage(3)}
+                >
+                  <Text style={styles.txt}>Reviews</Text>
+                </Pressable>
+              </Pressable>
+              {page === 1 && (
+                <View>
+                  <View
+                    style={[
+                      styles.contentSection,
+                      { backgroundColor: Colors.WHITE },
+                    ]}
+                  >
+                    <Text
+                      style={{ fontFamily: "outfit-semibold", fontSize: 15 }}
+                    >
+                      Content:
+                    </Text>
+                    <Text style={{ color: Colors.BLACK }}>{item?.content}</Text>
+                  </View>
+                  <View style={styles.contentSection}>
+                    <Text style={{ color: Colors.BLACK }}>{item?.output}</Text>
+                  </View>
+                </View>
+              )}
+              {page === 2 && (
+                <View>
+                  <Questions
+                    user={user}
+                    token={token}
+                    chapter={item}
+                    course={course}
+                  />
+                </View>
+              )}
+              {page === 3 && (
+                <ReviewSection
+                  review={course?.reviews}
+                  course={course}
+                  setCourse={setCourse}
+                  isChapter
+                />
+              )}
               <TouchableOpacity
                 onPress={() => nextPage(index)}
                 style={styles.nextBtn}
@@ -194,12 +304,6 @@ const ChapterContent = () => {
                   {course?.chapter?.length <= index + 1 ? "Finish" : "Next"}
                 </Text>
               </TouchableOpacity>
-              {/* <LessonsSection
-                course={course}
-                isEnrolled={userEnrollment}
-                onChapterSelect={(index) => scrollToIndex(index)}
-                selectedChapter={item}
-              /> */}
             </View>
           )}
           onScroll={handleScroll}
@@ -265,6 +369,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginVertical: 10,
     marginHorizontal: 10,
+  },
+  btn: {
+    width: 100,
+    padding: 8,
+    borderBottomWidth: 0,
+  },
+  txt: {
+    fontFamily: "outfit",
+    fontSize: 15,
+    textAlign: "center",
+    color: Colors.BLACK,
   },
 });
 

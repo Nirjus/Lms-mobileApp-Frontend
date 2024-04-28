@@ -7,6 +7,7 @@ import CourseLebelItem from "../Components/Course/CourseLebelItem";
 import axios from "axios";
 import SectionHeading from "../Components/SectionHeading";
 import Loader from "../Components/Loader";
+import Colors from "../utils/Colors";
 
 const Courses = () => {
   const navigation = useNavigation();
@@ -30,36 +31,41 @@ const Courses = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Header
-        title={"Courses"}
-        isLeft
-        component={
-          <TouchableOpacity
-            activeOpacity={0.5}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back-circle" size={40} color="black" />
-          </TouchableOpacity>
-        }
-      />
-      <SectionHeading title={"All Courses"} size={20} />
-      {courseList.length !== 0 && (
-        <FlatList
-          data={courseList}
-          refreshing={loading}
-          onRefresh={() => getAllCourses()}
-          renderItem={({ item, index }) => (
-            <CourseLebelItem item={item} key={item._id} />
-          )}
-        />
-      )}
+      <View
+        style={{ height: 180, backgroundColor: Colors.PRIMARY, padding: 30 }}
+      >
+        <Text
+          style={{
+            fontFamily: "outfit-bold",
+            color: Colors.WHITE,
+            fontSize: 30,
+            textAlign: "center",
+            marginTop: 20,
+          }}
+        >
+          All Courses
+        </Text>
+      </View>
       <View
         style={{
-          paddingBottom: 90,
-          backgroundColor: "rgba(255,255,255,0.0)",
-          backfaceVisibility: "visible",
+          marginTop: -50,
+          flex: 1,
+          marginBottom: 70,
         }}
-      />
+      >
+        <View>
+          {courseList.length !== 0 && (
+            <FlatList
+              data={courseList}
+              refreshing={loading}
+              onRefresh={() => getAllCourses()}
+              renderItem={({ item, index }) => (
+                <CourseLebelItem item={item} key={item._id} />
+              )}
+            />
+          )}
+        </View>
+      </View>
       <Loader visible={loading} />
     </View>
   );
