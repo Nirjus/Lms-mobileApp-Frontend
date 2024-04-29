@@ -26,6 +26,7 @@ import Sidebar from "../../Components/Course/Sidebar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ReviewSection from "../../Components/Course/ReviewSection";
 import Questions from "../../Components/Course/Questions";
+import Quiz from "../../Components/Course/Quiz";
 
 const ChapterContent = () => {
   const { params } = useRoute();
@@ -132,7 +133,7 @@ const ChapterContent = () => {
           </TouchableOpacity>
         }
       />
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <ProgressBar
           contentLength={course?.chapter?.length}
           contentIndex={activeIndex}
@@ -176,129 +177,150 @@ const ChapterContent = () => {
                   {item?.title}
                 </Text>
 
-                <Pressable
-                  onPress={() => onChapterComplete(item)}
-                  style={styles.markAsCompleted}
-                >
-                  <Text
-                    style={{
-                      fontFamily: "outfit",
-                      fontSize: 12,
-                      color: Colors.WHITE,
-                    }}
-                  >
-                    Mark as Completed
-                  </Text>
-                </Pressable>
-              </View>
-              <TouchableOpacity
-                onPress={() => nextPage(index)}
-                style={styles.nextBtn}
-              >
-                <Text
-                  style={{
-                    color: Colors.WHITE,
-                    textAlign: "center",
-                    fontFamily: "outfit-semibold",
-                    fontSize: 16,
-                  }}
-                >
-                  {course?.chapter?.length <= index + 1 ? "Finish" : "Next"}
-                </Text>
-              </TouchableOpacity>
-              <Pressable
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <Pressable
-                  style={[
-                    styles.btn,
-                    page === 1
-                      ? {
-                          borderBottomWidth: 2,
-                          borderBottomColor: "#727272",
-                        }
-                      : {
-                          borderBottomWidth: 0,
-                        },
-                  ]}
-                  onPress={() => setPage(1)}
-                >
-                  <Text style={styles.txt}>Overview</Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.btn,
-                    page === 2
-                      ? {
-                          borderBottomWidth: 2,
-                          borderBottomColor: "#727272",
-                        }
-                      : {
-                          borderBottomWidth: 0,
-                        },
-                  ]}
-                  onPress={() => setPage(2)}
-                >
-                  <Text style={styles.txt}>Q&A</Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    styles.btn,
-                    page === 3
-                      ? {
-                          borderBottomWidth: 2,
-                          borderBottomColor: "#727272",
-                        }
-                      : {
-                          borderBottomWidth: 0,
-                        },
-                  ]}
-                  onPress={() => setPage(3)}
-                >
-                  <Text style={styles.txt}>Reviews</Text>
-                </Pressable>
-              </Pressable>
-              {page === 1 && (
-                <View>
-                  <View
-                    style={[
-                      styles.contentSection,
-                      { backgroundColor: Colors.WHITE },
-                    ]}
+                {item?.title !== "Quiz" && (
+                  <Pressable
+                    onPress={() => onChapterComplete(item)}
+                    style={styles.markAsCompleted}
                   >
                     <Text
-                      style={{ fontFamily: "outfit-semibold", fontSize: 15 }}
+                      style={{
+                        fontFamily: "outfit",
+                        fontSize: 12,
+                        color: Colors.WHITE,
+                      }}
                     >
-                      Content:
+                      Mark as Completed
                     </Text>
-                    <Text style={{ color: Colors.BLACK }}>{item?.content}</Text>
-                  </View>
-                  <View style={styles.contentSection}>
-                    <Text style={{ color: Colors.BLACK }}>{item?.output}</Text>
-                  </View>
-                </View>
-              )}
-              {page === 2 && (
+                  </Pressable>
+                )}
+              </View>
+              {item?.title !== "Quiz" && (
                 <View>
-                  <Questions
-                    user={user}
-                    token={token}
-                    chapter={item}
-                    course={course}
-                  />
+                  <TouchableOpacity
+                    onPress={() => nextPage(index)}
+                    style={styles.nextBtn}
+                  >
+                    <Text
+                      style={{
+                        color: Colors.WHITE,
+                        textAlign: "center",
+                        fontFamily: "outfit-semibold",
+                        fontSize: 16,
+                      }}
+                    >
+                      {course?.chapter?.length <= index + 1 ? "Finish" : "Next"}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <Pressable
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: 10,
+                    }}
+                  >
+                    <Pressable
+                      style={[
+                        styles.btn,
+                        page === 1
+                          ? {
+                              borderBottomWidth: 2,
+                              borderBottomColor: "#727272",
+                            }
+                          : {
+                              borderBottomWidth: 0,
+                            },
+                      ]}
+                      onPress={() => setPage(1)}
+                    >
+                      <Text style={styles.txt}>Overview</Text>
+                    </Pressable>
+                    <Pressable
+                      style={[
+                        styles.btn,
+                        page === 2
+                          ? {
+                              borderBottomWidth: 2,
+                              borderBottomColor: "#727272",
+                            }
+                          : {
+                              borderBottomWidth: 0,
+                            },
+                      ]}
+                      onPress={() => setPage(2)}
+                    >
+                      <Text style={styles.txt}>Q&A</Text>
+                    </Pressable>
+                    <Pressable
+                      style={[
+                        styles.btn,
+                        page === 3
+                          ? {
+                              borderBottomWidth: 2,
+                              borderBottomColor: "#727272",
+                            }
+                          : {
+                              borderBottomWidth: 0,
+                            },
+                      ]}
+                      onPress={() => setPage(3)}
+                    >
+                      <Text style={styles.txt}>Reviews</Text>
+                    </Pressable>
+                  </Pressable>
+
+                  {page === 1 && (
+                    <View>
+                      <View
+                        style={[
+                          styles.contentSection,
+                          { backgroundColor: Colors.WHITE },
+                        ]}
+                      >
+                        <Text
+                          style={{
+                            fontFamily: "outfit-semibold",
+                            fontSize: 15,
+                          }}
+                        >
+                          Content:
+                        </Text>
+                        <Text style={{ color: Colors.BLACK }}>
+                          {item?.content}
+                        </Text>
+                      </View>
+                      <View style={styles.contentSection}>
+                        <Text style={{ color: Colors.BLACK }}>
+                          {item?.output}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                  {page === 2 && (
+                    <View>
+                      <Questions
+                        user={user}
+                        token={token}
+                        chapter={item}
+                        course={course}
+                      />
+                    </View>
+                  )}
+                  {page === 3 && (
+                    <ReviewSection
+                      review={course?.reviews}
+                      course={course}
+                      setCourse={setCourse}
+                      isChapter
+                    />
+                  )}
                 </View>
               )}
-              {page === 3 && (
-                <ReviewSection
-                  review={course?.reviews}
-                  course={course}
-                  setCourse={setCourse}
-                  isChapter
+              {item?.title === "Quiz" && (
+                <Quiz
+                  quiz={item?.quiz}
+                  onChapterComplete={() => onChapterComplete(item)}
                 />
               )}
             </View>

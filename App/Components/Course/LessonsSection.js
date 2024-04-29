@@ -66,7 +66,7 @@ const LessonsSection = ({
                     backgroundColor: Colors.SECONDARY_LIGHT,
                   },
                   isCompleted && {
-                    backgroundColor: "#b3f5d6",
+                    backgroundColor: "#c8f7e1",
                   },
                 ]}
               >
