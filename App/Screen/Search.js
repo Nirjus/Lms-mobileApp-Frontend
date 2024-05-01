@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import DropDownPicker from "react-native-dropdown-picker";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import Colors from "../utils/Colors";
 import { useNavigation } from "@react-navigation/native";
@@ -21,6 +22,8 @@ const Search = () => {
   const [keyword, setKeyword] = useState("");
   const [tags, setTags] = useState("");
   const [category, setCategory] = useState("");
+  const [open, setOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
   const getAllCourse = async () => {
     try {
       await axios
@@ -37,8 +40,22 @@ const Search = () => {
       console.log(error);
     }
   };
+  const getAllCategory = async () => {
+    try {
+      await axios.get("/category/getAll-category").then((res) => {
+        const categoryData = res.data.categories?.map((cate) => ({
+          label: cate?.name,
+          value: cate?.name,
+        }));
+        setCategories(categoryData);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useEffect(() => {
     getAllCourse();
+    getAllCategory();
   }, [keyword, tags, category]);
   return (
     <View style={{ flex: 1 }}>
@@ -84,7 +101,7 @@ const Search = () => {
       <View
         style={{
           flexDirection: "row",
-          alignItems: "center",
+          alignItems: "flex-start",
           justifyContent: "space-between",
           paddingHorizontal: 10,
           paddingBottom: 10,
@@ -97,69 +114,100 @@ const Search = () => {
           <Ionicons name="filter" size={24} color="black" />
           <Text style={styles.txtStyle}>Search by</Text>
         </View>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-          <Pressable
-            style={[
-              styles.btn,
-              { backgroundColor: option === 1 ? "#5f5f5f" : "#c4c4c4" },
-            ]}
-            onPress={() => {
-              setOption(1);
-              setTags("");
-              setCourses("");
-            }}
-          >
-            <Text
+        <View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+            <Pressable
               style={[
-                styles.txtStyle,
-                { color: option === 1 ? Colors.WHITE : Colors.BLACK },
+                styles.btn,
+                { backgroundColor: option === 1 ? "#5f5f5f" : "#c4c4c4" },
               ]}
+              onPress={() => {
+                setOption(1);
+                setTags("");
+                setCourses("");
+              }}
             >
-              Keyword
-            </Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.btn,
-              { backgroundColor: option === 2 ? "#5f5f5f" : "#c4c4c4" },
-            ]}
-            onPress={() => {
-              setOption(2);
-              setKeyword("");
-              setCategory("");
-            }}
-          >
-            <Text
+              <Text
+                style={[
+                  styles.txtStyle,
+                  { color: option === 1 ? Colors.WHITE : Colors.BLACK },
+                ]}
+              >
+                Keyword
+              </Text>
+            </Pressable>
+            <Pressable
               style={[
-                styles.txtStyle,
-                { color: option === 2 ? Colors.WHITE : Colors.BLACK },
+                styles.btn,
+                { backgroundColor: option === 2 ? "#5f5f5f" : "#c4c4c4" },
               ]}
+              onPress={() => {
+                setOption(2);
+                setKeyword("");
+                setCategory("");
+              }}
             >
-              Tags
-            </Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.btn,
-              { backgroundColor: option === 3 ? "#5f5f5f" : "#c4c4c4" },
-            ]}
-            onPress={() => {
-              setOption(3);
-              setKeyword("");
-              setTags("");
-            }}
-          >
-            <Text
+              <Text
+                style={[
+                  styles.txtStyle,
+                  { color: option === 2 ? Colors.WHITE : Colors.BLACK },
+                ]}
+              >
+                Tags
+              </Text>
+            </Pressable>
+            <Pressable
               style={[
-                styles.txtStyle,
-                { color: option === 3 ? Colors.WHITE : Colors.BLACK },
+                styles.btn,
+                { backgroundColor: option === 3 ? "#5f5f5f" : "#c4c4c4" },
               ]}
+              onPress={() => {
+                setOption(3);
+                setKeyword("");
+                setTags("");
+              }}
             >
-              Category
-            </Text>
-          </Pressable>
+              <Text
+                style={[
+                  styles.txtStyle,
+                  { color: option === 3 ? Colors.WHITE : Colors.BLACK },
+                ]}
+              >
+                Category
+              </Text>
+            </Pressable>
+          </View>
         </View>
       </View>
+      {option === 3 && (
+        <View
+          style={{
+            backgroundColor: Colors.WHITE,
+            borderBottomWidth: 1,
+            borderBottomColor: "#d3d3d3",
+            zIndex: 10,
+          }}
+        >
+          <View
+            style={{
+              padding: 10,
+              width: 240,
+            }}
+          >
+            <DropDownPicker
+              autoScroll
+              maxHeight={categories?.length * 50}
+              open={open}
+              value={category}
+              items={categories}
+              setOpen={setOpen}
+              setValue={setCategory}
+              setItems={setCategories}
+              placeholder={"Choose Category"}
+            />
+          </View>
+        </View>
+      )}
       {courses &&
         courses.length !== 0 &&
         (keyword.length !== 0 ||
