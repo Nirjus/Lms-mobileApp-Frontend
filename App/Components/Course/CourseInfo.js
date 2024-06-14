@@ -13,6 +13,7 @@ import Markdown from "react-native-markdown-display";
 import Colors from "../../utils/Colors";
 import SectionHeading from "../SectionHeading";
 import IntroVideoModal from "../Common/modal/introVideoModal";
+import { timeFormat } from "../../utils/timeHandler";
 
 const CourseInfo = ({ course, isEnrolled }) => {
   const [openTags, setOpenTags] = useState(false);
@@ -29,43 +30,9 @@ const CourseInfo = ({ course, isEnrolled }) => {
             padding: 10,
             height: "100%",
             flexDirection: "column",
-            justifyContent: !isEnrolled ? "space-between" : "flex-end",
+            justifyContent: "flex-end",
           }}
         >
-          {!isEnrolled && (
-            <View
-              style={{
-                backgroundColor: "#ffffff47",
-                borderRadius: 99,
-                justifyContent: "center",
-                alignItems: "center",
-                width: 60,
-                height: 60,
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: "outfit",
-                  fontSize: 12,
-                  fontWeight: "500",
-                  color: Colors.WHITE,
-                  textAlign: "center",
-                }}
-              >
-                Enrolled
-              </Text>
-              <Text
-                style={{
-                  fontFamily: "outfit",
-                  fontSize: 11,
-                  fontWeight: "400",
-                  color: "#c0bfbf",
-                }}
-              >
-                Hurry up!
-              </Text>
-            </View>
-          )}
           <TouchableOpacity
             activeOpacity={0.5}
             style={styles.introVIdeoButton}
@@ -145,7 +112,7 @@ const CourseInfo = ({ course, isEnrolled }) => {
                 fontSize: 14,
               }}
             >
-              {course?.rating} ⭐ Rating
+              {course?.rating} ⭐ Rating ({course?.reviews?.length})
             </Text>
           </View>
           <View
@@ -172,25 +139,15 @@ const CourseInfo = ({ course, isEnrolled }) => {
                   color: Colors.PRIMARY,
                 }}
               >
-                {course?.chapter?.length} Chapters ({course?.time})
+                {course?.chapter?.length} Chapters ({timeFormat(course?.time)})
               </Text>
             </View>
             <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                columnGap: 5,
               }}
             >
-              <Text
-                style={{
-                  fontFamily: "outfit",
-                  fontSize: 12,
-                  color: Colors.PRIMARY,
-                }}
-              >
-                ({course?.reviews?.length}Enrolled)
-              </Text>
               <Text
                 style={{
                   paddingHorizontal: 5,
@@ -248,6 +205,7 @@ const CourseInfo = ({ course, isEnrolled }) => {
             </View>
             <View
               style={{
+                width: "100%",
                 flexDirection: "row",
                 justifyContent: "flex-start",
                 alignItems: "flex-start",
@@ -261,6 +219,7 @@ const CourseInfo = ({ course, isEnrolled }) => {
                   alignItems: "center",
                   columnGap: 5,
                   marginTop: 6,
+                  width: "15%",
                 }}
               >
                 <FontAwesome6 name="tags" size={15} color="#fd3391" />
@@ -270,6 +229,7 @@ const CourseInfo = ({ course, isEnrolled }) => {
               </View>
               <View
                 style={{
+                  width: "80%",
                   display: "flex",
                   flexDirection: "row",
                   flexWrap: "wrap",
@@ -328,8 +288,8 @@ const styles = StyleSheet.create({
   introVIdeoButton: {
     padding: 10,
     borderRadius: 5,
-    width: 140,
-    backgroundColor: "#ffffff99",
+
+    backgroundColor: "#ffffffb7",
     justifyContent: "center",
     alignItems: "center",
   },
