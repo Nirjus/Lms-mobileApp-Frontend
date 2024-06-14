@@ -3,11 +3,7 @@ import { useFonts } from "expo-font";
 import { Provider } from "react-redux";
 import Store from "./redux/store";
 import RootNavigation from "./Navigation/navigation";
-import { useState } from "react";
-import axios from "axios";
 
-axios.defaults.baseURL = "http://192.168.29.5:8000/api/v1"; // for pc -> 192.168.29.23 for physical device -> 192.168.29.5
-// hosted url (render hosted) -> https://lms-mobileapp-backend.onrender.com
 export default function App() {
   const [fontsLaded] = useFonts({
     outfit: require("./assets/Fonts/Outfit-Regular.ttf"),

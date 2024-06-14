@@ -16,6 +16,7 @@ import { shareAsync } from "expo-sharing";
 import Header from "../../Components/Common/Header";
 import Colors from "../../utils/Colors";
 import { pdfTemplate } from "../../utils/GenerateCirtificate";
+import { timeFormat } from "../../utils/timeHandler";
 
 const Achivements = () => {
   const navigation = useNavigation();
@@ -50,7 +51,7 @@ const Achivements = () => {
     getAllCompletedCourse();
   }, []);
   const formatDate = (date) => {
-    const formattedJoinDate = new Date(date).toLocaleDateString("en-US", {
+    const formattedJoinDate = new Date(date).toLocaleDateString("en-IN", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -145,7 +146,7 @@ const Achivements = () => {
                     item?.name,
                     Date.now(),
                     item?.author,
-                    item?.time,
+                    timeFormat(item?.time),
                     item?.category
                   )
                 }

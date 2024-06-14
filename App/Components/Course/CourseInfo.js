@@ -1,190 +1,314 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
-import { AntDesign, FontAwesome6, Ionicons } from "@expo/vector-icons";
-import { Video, ResizeMode } from "expo-av";
+import {
+  ImageBackground,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import React, { useState } from "react";
+import { AntDesign, FontAwesome6 } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import Markdown from "react-native-markdown-display";
 import Colors from "../../utils/Colors";
 import SectionHeading from "../SectionHeading";
+import IntroVideoModal from "../Common/modal/introVideoModal";
 
-const CourseInfo = ({ course }) => {
+const CourseInfo = ({ course, isEnrolled }) => {
+  const [openTags, setOpenTags] = useState(false);
+  const [introVideo, setIntroVideo] = useState(false);
   return (
-    course && (
-      <View>
-        <Video
-          // ref={video}
-          style={styles.video}
-          source={{
-            uri: course?.chapter[0]?.video.url,
-          }}
-          useNativeControls
-          resizeMode={ResizeMode.CONTAIN}
-          isLooping
-          // onPlaybackStatusUpdate={(status) => setStatus(() => status)}
-        />
+    <View style={{ width: "100%", padding: 10 }}>
+      <ImageBackground
+        borderRadius={5}
+        style={styles.imageViewr}
+        source={{ uri: course?.banner?.url }}
+      >
         <View
           style={{
-            backgroundColor: "#fff",
-            borderRadius: 10,
-            width: "95%",
-            alignSelf: "center",
+            padding: 10,
+            height: "100%",
+            flexDirection: "column",
+            justifyContent: !isEnrolled ? "space-between" : "flex-end",
           }}
         >
-          <View style={{ marginBottom: 10 }}>
-            <Text
-              style={{
-                fontSize: 22,
-                fontFamily: "outfit-bold",
-                marginHorizontal: 10,
-                marginVertical: 10,
-              }}
-            >
-              {course?.name}
-            </Text>
+          {!isEnrolled && (
             <View
               style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
+                backgroundColor: "#ffffff47",
+                borderRadius: 99,
+                justifyContent: "center",
                 alignItems: "center",
-                paddingHorizontal: 10,
+                width: 60,
+                height: 60,
               }}
             >
-              <View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 5,
-                    marginLeft: 5,
-                  }}
-                >
-                  <FontAwesome6 name="user" size={17} color={Colors.PRIMARY} />
-                  <Text
-                    style={{
-                      fontFamily: "outfit-bold",
-                      fontSize: 15,
-                      marginHorizontal: 4,
-                      color: Colors.PRIMARY,
-                    }}
-                  >
-                    {course.author}
-                  </Text>
-                </View>
-                {course?.chapter?.length !== 0 && (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      gap: 4,
-                      alignItems: "center",
-                      marginTop: 5,
-                    }}
-                  >
-                    <AntDesign name="book" size={22} color="#d64c25" />
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        fontFamily: "outfit",
-                        color: "grey",
-                      }}
-                    >
-                      {course?.chapter?.length} Chapters ({course?.time} h)
-                    </Text>
-                  </View>
-                )}
-              </View>
-              <View
+              <Text
                 style={{
-                  justifyContent: "flex-end",
-                  alignItems: "flex-end",
-                  marginRight: 5,
+                  fontFamily: "outfit",
+                  fontSize: 12,
+                  fontWeight: "500",
+                  color: Colors.WHITE,
+                  textAlign: "center",
                 }}
               >
-                <Text
-                  style={{
-                    fontFamily: "outfit-semibold",
-                    color: "#dd5629",
-                    fontSize: 15,
-                  }}
-                >
-                  {course?.rating} ⭐ Rating
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: "outfit-bold",
-                    fontSize: 16,
-                    color: Colors.PRIMARY,
-                    marginTop: 5,
-                  }}
-                >
-                  {course?.price === 0 ? "Free" : "Paid"}
-                </Text>
-              </View>
+                Enrolled
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "outfit",
+                  fontSize: 11,
+                  fontWeight: "400",
+                  color: "#c0bfbf",
+                }}
+              >
+                Hurry up!
+              </Text>
             </View>
-          </View>
+          )}
+          <TouchableOpacity
+            activeOpacity={0.5}
+            style={styles.introVIdeoButton}
+            onPress={() => setIntroVideo(true)}
+          >
+            <Text
+              style={{
+                fontSize: 13,
+                fontFamily: "outfit",
+                color: Colors.PRIMARY,
+              }}
+            >
+              Watch Intro Video
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
+      <View
+        style={{
+          marginTop: 5,
+          backgroundColor: "#fff",
+          borderRadius: 10,
+          paddingHorizontal: 10,
+        }}
+      >
+        <View>
+          <Text
+            style={{
+              fontSize: 22,
+              fontWeight: "500",
+              marginTop: 10,
+              fontStyle: "italic",
+            }}
+          >
+            {course?.name}
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: "#858585",
+              marginTop: -2,
+              marginBottom: 10,
+            }}
+          >
+            Course level {course?.courseLevel}
+          </Text>
           <View
             style={{
               flexDirection: "row",
+              justifyContent: "space-between",
               alignItems: "center",
-              gap: 10,
-              paddingBottom: 10,
-              paddingHorizontal: 20,
+              marginVertical: 10,
             }}
           >
             <View
               style={{
-                padding: 6,
-                backgroundColor: "#d0c3ff",
-                borderRadius: 5,
                 flexDirection: "row",
-                justifyContent: "center",
                 alignItems: "center",
-                gap: 10,
+                gap: 5,
               }}
             >
-              <Ionicons name="filter" size={20} color="#714afc" />
+              <FontAwesome6 name="user" size={14} color={"#757575"} />
               <Text
                 style={{
-                  textTransform: "capitalize",
-                  fontFamily: "outfit-semibold",
-                  fontWeight: "600",
-                  fontSize: 15,
-                  color: "#714afc",
+                  fontFamily: "outfit-bold",
+                  fontSize: 14,
+                  color: "#757575",
                 }}
               >
-                {course.courseLevel} Level
+                {course.author}
+              </Text>
+            </View>
+            <Text
+              style={{
+                fontFamily: "outfit-semibold",
+                color: "#dd5629",
+                fontSize: 14,
+              }}
+            >
+              {course?.rating} ⭐ Rating
+            </Text>
+          </View>
+          <View
+            style={{
+              justifyContent: "space-between",
+              alignItems: "center",
+              display: "flex",
+              flexDirection: "row",
+              marginBottom: 10,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 4,
+                alignItems: "center",
+              }}
+            >
+              <AntDesign name="book" size={14} color="#d64c25" />
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontFamily: "outfit",
+                  color: Colors.PRIMARY,
+                }}
+              >
+                {course?.chapter?.length} Chapters ({course?.time})
               </Text>
             </View>
             <View
               style={{
-                padding: 6,
-                backgroundColor: "#ffcde4",
-                borderRadius: 5,
                 flexDirection: "row",
-                justifyContent: "center",
                 alignItems: "center",
-                gap: 10,
+                columnGap: 5,
               }}
             >
-              <FontAwesome6 name="tags" size={18} color="#fd3391" />
               <Text
                 style={{
-                  textTransform: "capitalize",
-                  fontFamily: "outfit-semibold",
-                  fontWeight: "600",
-                  fontSize: 15,
-                  color: "#fd3391",
+                  fontFamily: "outfit",
+                  fontSize: 12,
+                  color: Colors.PRIMARY,
                 }}
               >
-                {course.tags}
+                ({course?.reviews?.length}Enrolled)
+              </Text>
+              <Text
+                style={{
+                  paddingHorizontal: 5,
+                  fontFamily: "outfit",
+                  fontSize: 12,
+                  backgroundColor: "#9f8af7",
+                  borderRadius: 99,
+                  color: Colors.WHITE,
+                }}
+              >
+                {course?.price === 0 ? "Free" : "Paid"}
               </Text>
             </View>
           </View>
-          <SectionHeading title={"Description"} size={20} />
-          <View style={{ width: "90%", alignSelf: "center", marginTop: -10 }}>
-            <Markdown>{course?.description}</Markdown>
-          </View>
         </View>
+        <Pressable
+          style={{
+            borderWidth: openTags ? 1 : 0,
+            borderColor: "#e4e4e4",
+            marginHorizontal: 20,
+            marginBottom: 10,
+            position: "relative",
+          }}
+        >
+          {openTags ? (
+            <Feather
+              style={{
+                position: "absolute",
+                alignSelf: "center",
+                top: -10,
+                backgroundColor: "#fff",
+              }}
+              name="chevron-up"
+              size={24}
+              color="black"
+              onPress={() => setOpenTags(false)}
+            />
+          ) : (
+            <Feather
+              style={{ position: "absolute", alignSelf: "center", top: -10 }}
+              name="chevron-down"
+              size={24}
+              color="black"
+              onPress={() => setOpenTags(true)}
+            />
+          )}
+        </Pressable>
+        {openTags && (
+          <>
+            <Text style={{ fontFamily: "outfit-bold", marginLeft: 10 }}>
+              About
+            </Text>
+            <View style={{ marginTop: -5 }}>
+              <Markdown>{course?.description}</Markdown>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+                marginTop: 4,
+                marginBottom: 10,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  columnGap: 5,
+                  marginTop: 6,
+                }}
+              >
+                <FontAwesome6 name="tags" size={15} color="#fd3391" />
+                <Text style={{ color: "#777676", fontWeight: "500" }}>
+                  Tags:
+                </Text>
+              </View>
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  gap: 10,
+                  padding: 10,
+                  borderWidth: 1,
+                  borderColor: "#bcbcbc",
+                  borderRadius: 5,
+                  marginLeft: 10,
+                }}
+              >
+                {course.tags.map((i, index) => (
+                  <Text
+                    key={index}
+                    style={{
+                      textTransform: "capitalize",
+                      fontFamily: "outfit",
+                      paddingHorizontal: 6,
+                      paddingVertical: 2,
+                      fontSize: 12,
+                      backgroundColor: "#000",
+                      borderRadius: 99,
+                      color: Colors.WHITE,
+                    }}
+                  >
+                    {i}
+                  </Text>
+                ))}
+              </View>
+            </View>
+          </>
+        )}
       </View>
-    )
+      <IntroVideoModal
+        open={introVideo}
+        onClose={() => setIntroVideo(false)}
+        url={course?.chapter[0].video?.url}
+      />
+    </View>
   );
 };
 
@@ -197,5 +321,16 @@ const styles = StyleSheet.create({
     height: 200,
     marginBottom: 10,
     borderRadius: 10,
+  },
+  imageViewr: {
+    aspectRatio: 1.77,
+  },
+  introVIdeoButton: {
+    padding: 10,
+    borderRadius: 5,
+    width: 140,
+    backgroundColor: "#ffffff99",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

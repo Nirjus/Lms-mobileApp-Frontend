@@ -5,68 +5,65 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Feather, Ionicons, AntDesign } from "@expo/vector-icons";
 import SectionHeading from "../SectionHeading";
 import Colors from "../../utils/Colors";
-import axios from "axios";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 
-const LessonsSection = ({
-  course,
-  isEnrolled,
-  onChapterSelect,
-  selectedChapter = {},
-}) => {
-  const { token } = useSelector((state) => state.user);
-  const { update } = useSelector((state) => state.enroll);
-  const [completionStatus, setCompletionStatus] = useState({});
-  useEffect(() => {
-    const fetchCompletionStatus = async () => {
-      const statuses = {};
-      for (const chapter of course?.chapter) {
-        try {
-          const { data } = await axios.get(
-            `/enroll/check-complete?courseId=${course?._id}&chapterID=${chapter._id}`,
-            {
-              headers: {
-                Authorization: token,
-              },
-            }
-          );
-          statuses[chapter._id] = data.isComplete;
-        } catch (error) {
-          console.log(error);
-          statuses[chapter._id] = false; // Set completion status to false if there's an error
-        }
-      }
-      setCompletionStatus(statuses);
-    };
+const LessonsSection = ({ course, isEnrolled }) => {
+  const { enrollData } = useSelector((state) => state.enroll);
+  const { chapterProgressIndex } = useSelector((state) => state.course);
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
 
-    fetchCompletionStatus();
-  }, [course, token, update]);
+  const onChapterSelect = (item, index) => {
+    if (!isEnrolled && !item?.isFree) {
+      alert("This chapter is not free, Please Enroll Course!");
+      return;
+    } else {
+      dispatch({
+        type: "SET_INDEX",
+        payload: index,
+      });
+      navigation.navigate("ChapterContent", {
+        chapter: item,
+        isEnrolled: isEnrolled,
+      });
+    }
+  };
+  const isComplete = (chapterID) => {
+    return enrollData?.completedChapter?.some(
+      (ch) => ch.chapterID === chapterID
+    );
+  };
   return (
     <>
       <SectionHeading title={"Chapters"} size={20} />
-      <View style={{ flex: 1, marginHorizontal: 5, padding: 15 }}>
+      <View style={{ flex: 1, padding: 15 }}>
         <FlatList
           data={course?.chapter}
           showsVerticalScrollIndicator={false}
           renderItem={({ item, index }) => {
-            const isCompleted = completionStatus[item._id] || false;
+            const isCompleted = isComplete(item?._id);
             return (
               <TouchableOpacity
                 onPress={() => {
-                  onChapterSelect(index);
+                  onChapterSelect(item, index);
                 }}
                 key={item._id}
                 style={[
                   styles.lessonCard,
-                  selectedChapter?._id === item?._id && {
-                    backgroundColor: Colors.SECONDARY_LIGHT,
-                  },
+                  chapterProgressIndex === index
+                    ? {
+                        backgroundColor: "#f8ebe4",
+                      }
+                    : {
+                        backgroundColor: "#fff",
+                      },
                   isCompleted && {
-                    backgroundColor: "#c8f7e1",
+                    backgroundColor: "#e2fdf1",
                   },
                 ]}
               >
@@ -74,7 +71,7 @@ const LessonsSection = ({
                   <View
                     style={[
                       {
-                        backgroundColor: "#fcad99",
+                        backgroundColor: "#f5c0b3",
                         width: 26,
                         height: 26,
                         justifyContent: "center",
@@ -104,7 +101,7 @@ const LessonsSection = ({
                       : item?.title}
                   </Text>
                 </View>
-                {isEnrolled || index === 0 ? (
+                {isEnrolled || item?.isFree ? (
                   <>
                     {isCompleted ? (
                       <AntDesign
@@ -147,10 +144,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 15,
     borderWidth: 0.5,
-    borderColor: "grey",
+    borderColor: "#cbcaca",
     marginBottom: 10,
     borderRadius: 10,
-    backgroundColor: "#fff",
     elevation: 2,
   },
   textSection: {

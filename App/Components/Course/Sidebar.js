@@ -1,33 +1,50 @@
-import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Dimensions,
-  ScrollView,
-} from "react-native";
+import React, { useEffect } from "react";
+import { View, TouchableOpacity, Dimensions, ScrollView } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import LessonsSection from "./LessonsSection";
+import Animated, {
+  Easing,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 
-const Sidebar = ({
-  course,
-  isEnrolled,
-  onChapterSelect,
-  selectedChapter,
-  onClose,
-}) => {
+const { width: screenWidth } = Dimensions.get("window");
+
+const Sidebar = ({ course, isEnrolled, onClose }) => {
+  const translateX = useSharedValue(-screenWidth);
+
+  useEffect(() => {
+    translateX.value = withTiming(0, {
+      duration: 200,
+      easing: Easing.inOut(Easing.ease),
+    });
+  }, [translateX]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    };
+  });
+
   return (
-    <View
-      style={{
-        flex: 1,
-        width: Dimensions.get("screen").width - 50,
-        backgroundColor: "rgba(255,255,255,1)",
-        padding: 0,
-        borderWidth: 1,
-        borderColor: "#96969686",
-        borderTopRightRadius: 10,
-        borderBottomRightRadius: 10,
-      }}
+    <Animated.View
+      style={[
+        {
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          left: 0,
+          width: screenWidth - 40, // 75% of the screen width
+          backgroundColor: "rgba(255,255,255,1)",
+          padding: 0,
+          borderWidth: 1,
+          borderColor: "#96969686",
+          borderTopRightRadius: 10,
+          borderBottomRightRadius: 10,
+        },
+        animatedStyle,
+      ]}
     >
       <TouchableOpacity
         onPress={onClose}
@@ -40,14 +57,9 @@ const Sidebar = ({
         <MaterialIcons name="cancel" size={24} color="black" />
       </TouchableOpacity>
       <ScrollView style={{ flex: 1 }}>
-        <LessonsSection
-          course={course}
-          isEnrolled={isEnrolled}
-          onChapterSelect={onChapterSelect}
-          selectedChapter={selectedChapter}
-        />
+        <LessonsSection course={course} isEnrolled={isEnrolled} />
       </ScrollView>
-    </View>
+    </Animated.View>
   );
 };
 

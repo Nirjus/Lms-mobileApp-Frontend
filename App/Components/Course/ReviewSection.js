@@ -1,26 +1,9 @@
-import {
-  Alert,
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import React, { useState } from "react";
+import { Image, StyleSheet, Text, View } from "react-native";
+import React from "react";
 import StarRating from "react-native-star-rating";
-import Colors from "../../utils/Colors";
-import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
+import { Feather } from "@expo/vector-icons";
 
-const ReviewSection = ({ review, course, isChapter = false }) => {
-  const [rating, setRating] = useState(1);
-  const [comment, setComment] = useState("");
-  const { user, token } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
-  const isReviewd = review?.some(
-    (item) => item?.userId?.toString() === user?._id
-  );
+const ReviewSection = ({ review }) => {
   const formatDate = (date) => {
     const formattedJoinDate = new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
@@ -29,38 +12,7 @@ const ReviewSection = ({ review, course, isChapter = false }) => {
     });
     return formattedJoinDate;
   };
-  const handleAddReview = async () => {
-    try {
-      if (!rating || !comment) {
-        alert("Please provide reviews");
-      }
-      await axios
-        .put(
-          `/course/add-review/${course?._id}`,
-          {
-            rating,
-            comment,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: token,
-            },
-          }
-        )
-        .then((res) => {
-          dispatch({
-            type: "INIT_COURSE",
-          });
-          Alert.alert(res.data.message);
-        })
-        .catch((error) => {
-          alert(error.response.data.message);
-        });
-    } catch (error) {
-      console.log(error);
-    }
-  };
+
   return (
     <View
       style={{
@@ -69,69 +21,6 @@ const ReviewSection = ({ review, course, isChapter = false }) => {
         borderRadius: 10,
       }}
     >
-      {isChapter && !isReviewd && (
-        <View
-          style={{
-            padding: 10,
-            marginBottom: 10,
-            borderBottomWidth: 1,
-            borderBottomColor: "#b2b2b2",
-          }}
-        >
-          <View
-            style={{
-              marginBottom: 10,
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: "outfit-semibold",
-                fontSize: 15,
-                color: Colors.BLACK,
-              }}
-            >
-              (Give your review)
-            </Text>
-            <View style={{ width: 100 }}>
-              <StarRating
-                disabled={false}
-                maxStars={5}
-                starSize={18}
-                rating={rating}
-                fullStarColor={"#ffb700"}
-                selectedStar={(rating) => setRating(rating)}
-              />
-            </View>
-          </View>
-          <TextInput
-            style={{
-              padding: 10,
-              backgroundColor: "#ebebeb",
-              color: Colors.BLACK,
-              borderRadius: 5,
-            }}
-            multiline
-            numberOfLines={2}
-            placeholder="Wright your comment"
-            placeholderTextColor={"#a0a0a0"}
-            value={comment}
-            onChangeText={(txt) => setComment(txt)}
-          />
-          <TouchableOpacity
-            onPress={() => handleAddReview()}
-            style={styles.subminBtn}
-          >
-            <Text
-              style={{ fontFamily: "outfit-semibold", color: Colors.WHITE }}
-            >
-              Submit
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
       {review?.length !== 0 ? (
         <>
           {review?.map((item, index) => (
@@ -217,16 +106,69 @@ const ReviewSection = ({ review, course, isChapter = false }) => {
           ))}
         </>
       ) : (
-        <Text
-          style={{
-            marginVertical: 10,
-            textAlign: "center",
-            fontWeight: "bold",
-            color: "#000",
-          }}
-        >
-          No reviews have!
-        </Text>
+        <View>
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 8,
+              alignItems: "center",
+            }}
+          >
+            <View
+              style={{
+                height: 40,
+                width: 40,
+                borderRadius: 100,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "#c7c7fe",
+              }}
+            >
+              <Feather name="user" size={20} color="#7272fe" />
+            </View>
+            <Text
+              style={{
+                color: "#9a9a9a",
+                fontWeight: "bold",
+                fontSize: 16,
+                fontStyle: "italic",
+              }}
+            >
+              abc_xyz
+            </Text>
+          </View>
+          <View style={styles.reviewContentSection}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                paddingRight: 10,
+              }}
+            >
+              <View style={{ width: 100 }}>
+                <StarRating
+                  disabled={true}
+                  maxStars={5}
+                  starSize={18}
+                  rating={0}
+                  fullStarColor={"#ffb700"}
+                  halfStarEnabled={true}
+                />
+              </View>
+            </View>
+            <View style={{ padding: 5 }}>
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontFamily: "outfit",
+                  color: "#9a9999",
+                }}
+              >
+                give your first rating
+              </Text>
+            </View>
+          </View>
+        </View>
       )}
     </View>
   );

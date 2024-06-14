@@ -124,7 +124,7 @@ const Search = () => {
               onPress={() => {
                 setOption(1);
                 setTags("");
-                setCourses("");
+                setCategories("");
               }}
             >
               <Text

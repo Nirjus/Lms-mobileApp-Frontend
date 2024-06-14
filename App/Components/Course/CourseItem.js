@@ -38,63 +38,57 @@ const CourseItem = ({ item }) => {
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
+            marginBottom: 6,
           }}
         >
-          <View>
-            <Text
-              style={{
-                fontFamily: "outfit-bold",
-                fontSize: 13,
-                marginHorizontal: 4,
-                color: Colors.LIGHT_PRIMARY,
-              }}
-            >
-              {item.author}
-            </Text>
-            {item?.chapter?.length !== 0 && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  gap: 4,
-                  alignItems: "center",
-                  marginTop: 5,
-                }}
-              >
-                <AntDesign name="book" size={20} color="#d64c25" />
-                <Text
-                  style={{ fontSize: 11, fontFamily: "outfit", color: "grey" }}
-                >
-                  {item?.chapter?.length} Chapters ({item?.time} h)
-                </Text>
-              </View>
-            )}
-          </View>
-          <View
+          <Text
             style={{
-              justifyContent: "flex-end",
-              alignItems: "flex-end",
-              marginRight: 5,
+              fontFamily: "outfit-bold",
+              fontSize: 13,
+              color: Colors.LIGHT_PRIMARY,
             }}
           >
-            <Text
-              style={{
-                fontFamily: "outfit-light",
-                color: "#dd5629",
-                fontSize: 12,
-              }}
-            >
-              {item?.rating} ⭐ Rating
-            </Text>
-            <Text
-              style={{
-                fontFamily: "outfit-bold",
-                color: Colors.PRIMARY,
-                marginTop: 5,
-              }}
-            >
-              {item?.price === 0 ? "Free" : "Paid"}
+            {item.author}
+          </Text>
+          <Text
+            style={{
+              fontFamily: "outfit-light",
+              color: "#dd5629",
+              fontSize: 12,
+            }}
+          >
+            {item?.rating} ⭐ Rating
+          </Text>
+        </View>
+
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 4,
+              alignItems: "center",
+            }}
+          >
+            <AntDesign name="book" size={14} color="#d64c25" />
+            <Text style={{ fontSize: 11, fontFamily: "outfit", color: "grey" }}>
+              {item?.chapter?.length} Chapters ({item?.time})
             </Text>
           </View>
+          <Text
+            style={{
+              fontFamily: "outfit-bold",
+              color: Colors.PRIMARY,
+              fontSize: 13,
+            }}
+          >
+            {item?.price === 0 ? "Free" : "Paid"}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>

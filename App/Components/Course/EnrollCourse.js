@@ -1,21 +1,15 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import Colors from "../../utils/Colors";
+import CalculatePrice from "./calculatePrice";
 
 const EnrollCourse = ({
-  course,
+  coursePrice,
   isEnrolled,
-  isMember,
+  setPrice,
   checkEnrollingOfCourse,
   continueOnCourse,
 }) => {
-  const returnPrice = () => {
-    if (isMember) {
-      const price = course?.price - course?.price * 0.7;
-      return price;
-    }
-    return course?.price;
-  };
   return (
     <>
       {isEnrolled ? (
@@ -56,17 +50,7 @@ const EnrollCourse = ({
             alignItems: "center",
           }}
         >
-          <Text
-            style={{
-              textAlign: "center",
-              fontFamily: "outfit-semibold",
-              fontWeight: "600",
-              fontSize: 15,
-              color: Colors.WHITE,
-            }}
-          >
-            EnrollCourse ({course?.price === 0 ? "Free" : "₹" + returnPrice()})
-          </Text>
+          <CalculatePrice coursePrice={coursePrice} setPrice={setPrice} />
         </TouchableOpacity>
       )}
     </>

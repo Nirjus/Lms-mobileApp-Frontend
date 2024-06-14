@@ -1,4 +1,5 @@
 import {
+  Dimensions,
   FlatList,
   Image,
   Pressable,
@@ -15,6 +16,7 @@ import SilverMedal from "../../../assets/images/second.png";
 import BronzeMedel from "../../../assets/images/third.png";
 const LeaderBoard = () => {
   const { token } = useSelector((state) => state.user);
+  const { height } = Dimensions.get("screen");
   const [userList, setUserList] = useState([]);
   const [loading, setLoading] = useState(false);
   const getAllUser = async () => {
@@ -56,7 +58,7 @@ const LeaderBoard = () => {
           LeaderBoard
         </Text>
       </View>
-      <View style={{ marginTop: -40 }}>
+      <View style={{ marginTop: -40, height: height - 250 }}>
         <FlatList
           data={userList}
           refreshing={loading}
@@ -89,22 +91,22 @@ const LeaderBoard = () => {
               {item?.avatar?.url ? (
                 <Image
                   source={{ uri: item?.avatar?.url }}
-                  style={{ width: 60, height: 60, borderRadius: 99 }}
+                  style={{ width: 50, height: 50, borderRadius: 99 }}
                 />
               ) : (
                 <Image
                   source={require("../../../assets/images/pngegg.png")}
-                  style={{ width: 60, height: 60, borderRadius: 99 }}
+                  style={{ width: 50, height: 50, borderRadius: 99 }}
                 />
               )}
               <View>
-                <Text style={{ fontFamily: "outfit-semibold", fontSize: 20 }}>
+                <Text style={{ fontFamily: "outfit-semibold", fontSize: 15 }}>
                   {item?.name}
                 </Text>
                 <Text
                   style={{
                     fontFamily: "outfit",
-                    fontSize: 16,
+                    fontSize: 14,
                     color: "#686868",
                   }}
                 >
@@ -125,6 +127,7 @@ const LeaderBoard = () => {
               ) : null}
             </Pressable>
           )}
+          nestedScrollEnabled
         />
       </View>
     </View>

@@ -1,10 +1,21 @@
-import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Alert,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import SubmitButton from "../../components/Forms/SubmitButton.js";
 import Colors from "../utils/Colors.js";
+import avatar from "../../assets/adaptive-icon.png";
+
 import { useNavigation } from "@react-navigation/native";
 
 export default function Login() {
@@ -25,80 +36,105 @@ export default function Login() {
   const submitHandler = async () => {
     try {
       setLoading(true);
-      if (!email && !password) {
-        Alert.alert("Please fill All fields");
-        setLoading(false);
-        return;
-      }
-      setLoading(false);
       await axios
         .post("/user/login", {
           email,
           password,
         })
         .then((res) => {
-          alert(res.data.message);
+          Alert.alert("Success", res.data.message);
           setUserInfo(res.data);
           navigation.navigate("BottomTabs");
         })
         .catch((error) => {
           alert(error.response.data.message);
-        });
+        })
+        .finally(() => setLoading(false));
     } catch (error) {
-      alert(error.response.data.message);
       setLoading(false);
       console.log(error);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <View style={{ marginHorizontal: 20 }}>
-        <Text>EMAIL</Text>
-        <TextInput
-          style={styles.inputBox}
-          placeholder="abcd@gmail.com"
-          autoCorrect={false}
-          keyboardType="email-address"
-          autoComplete={"email"}
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-        />
-        <Text>PASSWORD</Text>
-        <TextInput
-          style={styles.inputBox}
-          autoCorrect={false}
-          placeholder="$%&^#GJ%#654"
-          autoComplete="password"
-          secureTextEntry={true}
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-        />
-      </View>
-
-      <SubmitButton
-        text={"Login"}
-        loading={loading}
-        submitCallback={submitHandler}
-      />
-
-      <Text style={{ textAlign: "center" }}>
-        Not have an account?
-        <Text
-          style={{ color: "red" }}
-          onPress={() => navigation.navigate("Registration")}
+    <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Login</Text>
+        <View
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
-          {" "}
-          Register
+          <Image
+            source={avatar}
+            width={100}
+            height={100}
+            style={{ width: 120, height: 120, objectFit: "contain" }}
+          />
+        </View>
+        <View style={{ marginHorizontal: 20 }}>
+          <Text style={{ fontFamily: "outfit" }}>EMAIL</Text>
+          <TextInput
+            style={styles.inputBox}
+            placeholder="abcd@gmail.com"
+            autoCorrect={false}
+            keyboardType="email-address"
+            autoComplete={"email"}
+            value={email}
+            onChangeText={(text) => setEmail(text)}
+          />
+          <Text style={{ fontFamily: "outfit" }}>PASSWORD</Text>
+          <TextInput
+            style={styles.inputBox}
+            autoCorrect={false}
+            placeholder="$%&^#GJ%#654"
+            autoComplete="password"
+            secureTextEntry={true}
+            value={password}
+            onChangeText={(text) => setPassword(text)}
+          />
+          <Text
+            style={{
+              textAlign: "right",
+              fontFamily: "outfit",
+              fontSize: 13,
+              color: "red",
+            }}
+            onPress={() => navigation.navigate("ForgotPassword")}
+          >
+            Forgot password?
+          </Text>
+        </View>
+
+        <SubmitButton
+          text={"Login"}
+          loading={loading}
+          submitCallback={submitHandler}
+        />
+
+        <Text style={{ textAlign: "center", fontFamily: "outfit" }}>
+          Not have an account?
+          <Text
+            style={{ color: "red" }}
+            onPress={() => navigation.navigate("Registration")}
+          >
+            {" "}
+            SIGNUP
+          </Text>
         </Text>
-      </Text>
-    </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: Colors.WHITE,
+    width: Dimensions.get("screen").width,
+    height: Dimensions.get("screen").height - 50,
     flex: 1,
     justifyContent: "center",
   },
@@ -112,7 +148,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   inputBox: {
-    fontSize: 18,
+    fontSize: 15,
     marginBottom: 20,
     backgroundColor: "#e5e5e5",
     borderRadius: 10,

@@ -1,14 +1,12 @@
 import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 import React, { useState } from "react";
 import { MaterialCommunityIcons, Entypo } from "@expo/vector-icons";
-import Colors from "../../utils/Colors";
-import { useDispatch } from "react-redux";
 import axios from "axios";
+import Colors from "../../utils/Colors";
 
-const Answer = ({ item, token, chapter, course }) => {
+const Answer = ({ item, token, chapterId, courseId, setQnaArray }) => {
   const [answer, setAnswer] = useState("");
   const [show, setShow] = useState(false);
-  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const handleSubminAnswer = async (questionId) => {
     try {
@@ -19,9 +17,12 @@ const Answer = ({ item, token, chapter, course }) => {
       }
       await axios
         .put(
-          `/course/add-answer/${course?._id}?chapterId=${chapter?._id}&questionId=${questionId}`,
+          `/qna/add-answer`,
           {
+            courseId,
+            chapterId,
             answer,
+            questionId,
           },
           {
             headers: {
@@ -34,9 +35,7 @@ const Answer = ({ item, token, chapter, course }) => {
           setAnswer("");
           setLoading(false);
           setShow(true);
-          dispatch({
-            type: "INIT_COURSE",
-          });
+          setQnaArray(res.data.chapterQna?.questions);
         })
         .catch((error) => {
           setLoading(false);
@@ -48,7 +47,7 @@ const Answer = ({ item, token, chapter, course }) => {
     }
   };
   const formatDate = (date) => {
-    const formattedJoinDate = new Date(date).toLocaleDateString("en-US", {
+    const formattedJoinDate = new Date(date).toLocaleDateString("en-IN", {
       year: "numeric",
       month: "long",
       day: "numeric",

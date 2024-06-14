@@ -1,17 +1,19 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
-
 import Colors from "../../utils/Colors";
-import MemberShipModel from "../../Screen/MemberShipModel";
-const SourceSection = ({ isMember }) => {
-  const [open, setOpen] = useState(false);
+import { useNavigation } from "@react-navigation/native";
 
-  const openModal = () => {
+const SourceSection = ({ isMember }) => {
+  const navigation = useNavigation();
+
+  const navigateSubscriptionScreen = () => {
     if (!isMember) {
-      setOpen(true);
-      return;
+      navigation.navigate("MemberShipModel", {
+        type: "Creation",
+      });
     }
   };
+
   return (
     <View style={{ flex: 1, padding: 10 }}>
       <View style={styles.container}>
@@ -43,7 +45,10 @@ const SourceSection = ({ isMember }) => {
           >
             For Exciting Offers Claim now.
           </Text>
-          <Pressable onPress={() => openModal()} style={styles.claimBtn}>
+          <Pressable
+            onPress={() => navigateSubscriptionScreen()}
+            style={styles.claimBtn}
+          >
             <Text
               style={{ color: "#545353", textAlign: "center", fontSize: 13 }}
             >
@@ -52,7 +57,6 @@ const SourceSection = ({ isMember }) => {
           </Pressable>
         </View>
       </View>
-      <MemberShipModel open={open} onClose={() => setOpen(false)} />
     </View>
   );
 };

@@ -59,7 +59,7 @@ const Quiz = ({ quiz, onChapterComplete }) => {
     onChapterComplete();
   };
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, marginTop: 50 }}>
       <ScrollView>
         {result ? (
           <View style={styles.container}>
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.WHITE,
   },
   question: {
-    fontFamily: "outfit-bold",
+    fontFamily: "outfit-semibold",
     fontSize: 20,
     marginBottom: 5,
     color: Colors.BLACK,

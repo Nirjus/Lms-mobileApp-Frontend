@@ -1,5 +1,5 @@
 import {
-  Alert,
+  Dimensions,
   FlatList,
   Image,
   StyleSheet,
@@ -8,37 +8,54 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
-import Colors from "../../utils/Colors";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useDispatch } from "react-redux";
 import Answer from "./Answer";
-
-const Questions = ({ user, token, chapter, course }) => {
+import Colors from "../../utils/Colors";
+const { height } = Dimensions.get("window");
+const Questions = ({ user, token, chapterId, courseId }) => {
   const [question, setQuestion] = useState("");
+  const [qnaArray, setQnaArray] = useState([]);
   const [loading, setLoading] = useState(false);
-  const dispatch = useDispatch();
   const formatDate = (date) => {
-    const formattedJoinDate = new Date(date).toLocaleDateString("en-US", {
+    const formattedJoinDate = new Date(date).toLocaleDateString("en-IN", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
     return formattedJoinDate;
   };
-
+  useEffect(() => {
+    const getAllQnaOfAChapter = async () => {
+      try {
+        await axios
+          .get(`/qna/getAllQna/${courseId}?chapterId=${chapterId}`, {
+            headers: {
+              Authorization: token,
+            },
+          })
+          .then((res) => {
+            setQnaArray(res.data?.chapterQna?.questions);
+          })
+          .catch((error) => {
+            console.log(error.response.data.message);
+          });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getAllQnaOfAChapter();
+  }, [chapterId]);
   const addQuestion = async () => {
     try {
       setLoading(true);
-      if (!question) {
-        setLoading(false);
-        return;
-      }
       await axios
-        .put(
-          `/course/add-question/${course?._id}?chapterId=${chapter?._id}`,
+        .post(
+          `/qna/add-question`,
           {
-            question,
+            courseId,
+            chapterId,
+            questionString: question,
           },
           {
             headers: {
@@ -48,9 +65,7 @@ const Questions = ({ user, token, chapter, course }) => {
           }
         )
         .then((res) => {
-          dispatch({
-            type: "INIT_COURSE",
-          });
+          setQnaArray(res.data?.chapterQna?.questions);
           setQuestion("");
           setLoading(false);
         })
@@ -65,7 +80,7 @@ const Questions = ({ user, token, chapter, course }) => {
   };
 
   return (
-    <View style={{ padding: 10 }}>
+    <View style={{ flex: 1, padding: 10 }}>
       <View
         style={{
           flexDirection: "row",
@@ -131,7 +146,8 @@ const Questions = ({ user, token, chapter, course }) => {
       </View>
       <View>
         <FlatList
-          data={chapter?.qna}
+          data={qnaArray}
+          style={{ maxHeight: height / 2 }}
           renderItem={({ item, index }) => (
             <View key={item?._id}>
               <View
@@ -164,7 +180,7 @@ const Questions = ({ user, token, chapter, course }) => {
                       fontSize: 15,
                     }}
                   >
-                    {item?.name.substring(0, 1)}
+                    {item?.userName.substring(0, 1)}
                   </Text>
                 </View>
                 <View
@@ -182,24 +198,26 @@ const Questions = ({ user, token, chapter, course }) => {
                       fontSize: 15,
                     }}
                   >
-                    {item?.name}
+                    {item?.userName}
                   </Text>
                   <Text style={{ fontFamily: "outfit", color: Colors.BLACK }}>
-                    {item?.question}
+                    {item?.questionString}
                   </Text>
                   <Text style={{ fontSize: 11, color: "#868686" }}>
-                    {formatDate(item?.createdAt)}
+                    {formatDate(item?.create)}
                   </Text>
                 </View>
               </View>
               <Answer
                 item={item}
+                setQnaArray={setQnaArray}
                 token={token}
-                chapter={chapter}
-                course={course}
+                chapterId={chapterId}
+                courseId={courseId}
               />
             </View>
           )}
+          nestedScrollEnabled
         />
       </View>
     </View>

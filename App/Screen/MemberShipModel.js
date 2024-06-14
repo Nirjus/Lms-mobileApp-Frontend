@@ -1,36 +1,62 @@
 import {
   StyleSheet,
-  Text,
   View,
-  Modal,
   Pressable,
   Dimensions,
   TouchableOpacity,
   ImageBackground,
   Alert,
+  FlatList,
+  ScrollView,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import RazorpayCheckout from "react-native-razorpay";
+import { useNavigation } from "@react-navigation/native";
 import Colors from "../utils/Colors";
+import SubscriptionModel from "../Components/Common/Subscription/SubscriptionModel";
 
-const MemberShipModel = ({ open, onClose }) => {
-  const [select, setSelect] = useState(1);
+const MemberShipModel = () => {
+  const [subscriptions, setSubscriptions] = useState([]);
+  const flatListref = useRef(null);
   const { token } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
-  const memberHandler = async (paymentId, subscription) => {
-    try {
-      if (!paymentId || !subscription) {
-        alert("Please provide all information");
-        return;
+  const navigation = useNavigation();
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const getAllSybscription = async () => {
+      try {
+        await axios
+          .get("/subscription/getAll-subscription")
+          .then((res) => {
+            setSubscriptions(res.data.subscription);
+          })
+          .catch((error) => {
+            console.log(error.response.data.message);
+          });
+      } catch (error) {
+        console.log(error);
       }
+    };
+    getAllSybscription();
+  }, []);
+  const memberHandler = async (
+    paymentId,
+    price,
+    subscriptionPeriod,
+    subscriptionId
+  ) => {
+    try {
       await axios
         .post(
           "/member/create",
           {
             paymentId,
-            subscription,
+            price,
+            subscriptionPeriod,
+            subscriptionId,
           },
           {
             headers: {
@@ -40,11 +66,7 @@ const MemberShipModel = ({ open, onClose }) => {
         )
         .then((res) => {
           Alert.alert(res.data.message, "Welcome to ELearning Family");
-          dispatch({
-            type: "ADD_MEMBERSHIP",
-            payload: res.data.member,
-          });
-          onClose();
+          navigation.navigate("Membership");
         })
         .catch((error) => {
           alert(error.response.data.message);
@@ -53,14 +75,14 @@ const MemberShipModel = ({ open, onClose }) => {
       console.log(error);
     }
   };
-  const handlePayment = async () => {
+  const handlePayment = async (price, subscriptionPeriod, subscriptionId) => {
     try {
       const options = {
         description: "Credits towards consultation",
         image: "https://i.imgur.com/3g7nmJC.png",
         currency: "INR",
         key: "rzp_test_hzUg2csoySkyWy", // Your api key
-        amount: select === 1 ? 30 * 100 : 999 * 100,
+        amount: price * 100,
         name: "ELearner",
         prefill: {
           email: "void@razorpay.com",
@@ -71,19 +93,12 @@ const MemberShipModel = ({ open, onClose }) => {
       };
       RazorpayCheckout.open(options)
         .then((data) => {
-          let subscription = {};
-          if (select === 1) {
-            subscription = {
-              subscriptionPeriod: "1 Month",
-              price: 30,
-            };
-          } else {
-            subscription = {
-              subscriptionPeriod: "1 Year",
-              price: 999,
-            };
-          }
-          memberHandler(data.razorpay_payment_id, subscription);
+          memberHandler(
+            data.razorpay_payment_id,
+            price,
+            subscriptionPeriod,
+            subscriptionId
+          );
         })
         .catch((error) => {
           // handle failure
@@ -93,254 +108,136 @@ const MemberShipModel = ({ open, onClose }) => {
       alert(error);
     }
   };
+  const handleNext = () => {
+    if (currentIndex < subscriptions.length - 1) {
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
+      flatListref.current.scrollToIndex({ index: nextIndex, animated: true });
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      const prevIndex = currentIndex - 1;
+      setCurrentIndex(prevIndex);
+      flatListref.current.scrollToIndex({ index: prevIndex, animated: true });
+    }
+  };
+  const renderIndicator = () => {
+    return subscriptions.map((_, index) => (
+      <View
+        key={index}
+        style={[
+          styles.dot,
+          currentIndex === index ? styles.activeDot : styles.inactiveDot,
+        ]}
+      />
+    ));
+  };
   return (
-    <Modal transparent animationType="slide" visible={open}>
-      <View style={{ backgroundColor: "#00000027", flex: 1 }}>
-        <Pressable
-          style={styles.overlay}
-          onPress={() => {
-            onClose();
-          }}
-        ></Pressable>
-        <Pressable style={styles.mainView}>
-          <ImageBackground
-            source={require("../../assets/images/rocket.jpg")}
-            style={{ width: "100%", height: 180, marginBottom: 20 }}
-            resizeMode="cover"
-          >
-            <Text
-              style={{
-                fontFamily: "outfit-bold",
-                fontSize: 15,
-                color: Colors.WHITE,
-                marginTop: 20,
-                marginLeft: 10,
-              }}
-            >
-              Upgrade To
-            </Text>
-            <Text
-              style={{
-                fontFamily: "outfit-bold",
-                fontSize: 15,
-                color: Colors.WHITE,
-                marginLeft: 10,
-              }}
-            >
-              ELearner Pro
-            </Text>
-            <Text
-              style={{
-                color: "#fff",
-                fontFamily: "outfit",
-                fontSize: 11,
-                marginLeft: 10,
-                marginTop: 10,
-              }}
-            >
-              • Community Support
-            </Text>
-            <Text
-              style={{
-                color: "#fff",
-                fontFamily: "outfit",
-                fontSize: 11,
-                marginLeft: 10,
-              }}
-            >
-              • Access to Source Code
-            </Text>
-            <Text
-              style={{
-                color: "#fff",
-                fontFamily: "outfit",
-                fontSize: 11,
-                marginLeft: 10,
-              }}
-            >
-              • Member Module Access
-            </Text>
-            <Text
-              style={{
-                color: "#fff",
-                fontFamily: "outfit",
-                fontSize: 11,
-                marginLeft: 10,
-              }}
-            >
-              • 70% Off Popular Courses
-            </Text>
-            <Text
-              style={{
-                color: "#fff",
-                fontFamily: "outfit",
-                fontSize: 11,
-                marginLeft: 10,
-              }}
-            >
-              • Doubt Support
-            </Text>
-          </ImageBackground>
-          <Pressable style={{ paddingHorizontal: 20 }}>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-evenly",
-                alignItems: "center",
-              }}
-            >
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => setSelect(1)}
-                style={{
-                  borderWidth: 0.5,
-                  borderColor: "#888888",
-                  borderRadius: 10,
-                  padding: 15,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  backgroundColor: select === 1 ? "#ffb29a" : "#fff",
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 15,
-                    fontFamily: "outfit-bold",
-                    color: "#000",
-                  }}
-                >
-                  {" "}
-                  1 Month{" "}
-                </Text>
-                <View
-                  style={{
-                    borderColor: "#8e8e8e",
-                    borderTopWidth: 1,
-                    width: "100%",
-                    marginVertical: 5,
-                  }}
-                />
-
-                <Text
-                  style={{
-                    fontSize: 25,
-                    fontFamily: "outfit-bold",
-                    color: "#000",
-                  }}
-                >
-                  {" "}
-                  ₹30{" "}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setSelect(2)}
-                activeOpacity={0.7}
-                style={{
-                  borderWidth: 0.5,
-                  borderColor: "#888888",
-                  borderRadius: 10,
-                  padding: 15,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  backgroundColor: select === 2 ? "#ffb29a" : "#fff",
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 15,
-                    fontFamily: "outfit-bold",
-                    color: "#000",
-                  }}
-                >
-                  {" "}
-                  1 Year{" "}
-                </Text>
-                <View
-                  style={{
-                    borderColor: "#8e8e8e",
-                    borderTopWidth: 1,
-                    width: "100%",
-                    marginVertical: 5,
-                  }}
-                />
-
-                <Text
-                  style={{
-                    fontSize: 25,
-                    fontFamily: "outfit-bold",
-                    color: "#000",
-                  }}
-                >
-                  {" "}
-                  ₹999{" "}
-                </Text>
-              </TouchableOpacity>
-            </View>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: Colors.WHITE }}
+      showsVerticalScrollIndicator={false}
+    >
+      <Pressable style={styles.mainView}>
+        <ImageBackground
+          source={require("../../assets/images/rocket-png.png")}
+          style={styles.imageBackground}
+          resizeMode="contain"
+        >
+          <View style={{ padding: 10, marginTop: 40 }}>
             <TouchableOpacity
-              onPress={() => handlePayment()}
               activeOpacity={0.5}
-              style={{
-                padding: 15,
-                backgroundColor: Colors.SECONDARY,
-                borderRadius: 10,
-                marginTop: 20,
-              }}
+              onPress={() => navigation.goBack()}
+              style={{ width: 50 }}
             >
-              <Text
-                style={{
-                  textAlign: "center",
-                  color: "#fff",
-                  fontSize: 17,
-                  fontFamily: "outfit",
-                }}
-              >
-                Get Membership Now
-              </Text>
+              <Ionicons name="arrow-back-circle" size={40} color="#fff" />
             </TouchableOpacity>
-            <Text
-              style={{
-                color: "#989898",
-                textAlign: "center",
-                fontSize: 14,
-                fontFamily: "outfit",
-                marginTop: 10,
-              }}
-            >
-              You can purchase the membership to access all premimum features
-            </Text>
-            <Text
-              style={{
-                color: "#989898",
-                textAlign: "center",
-                fontSize: 14,
-                fontFamily: "outfit",
-                marginTop: 10,
-              }}
-            >
-              {" "}
-              If you want to cancel membership then email us on :
-              nirjuskarmakar@gmail.com{" "}
-            </Text>
-          </Pressable>
-        </Pressable>
-      </View>
-    </Modal>
+          </View>
+        </ImageBackground>
+        <ImageBackground
+          source={require("../../assets/images/linearGradient.png")}
+        >
+          <FlatList
+            ref={flatListref}
+            horizontal
+            data={subscriptions}
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <SubscriptionModel
+                item={item}
+                onUpgrade={handlePayment}
+                key={item._id}
+              />
+            )}
+            onScroll={(event) => {
+              const index = Math.round(
+                event.nativeEvent.contentOffset.x /
+                  event.nativeEvent.layoutMeasurement.width
+              );
+              setCurrentIndex(index);
+            }}
+            scrollEventThrottle={16}
+            style={{ marginTop: -15 }}
+          />
+          <View style={styles.paging}>
+            <TouchableOpacity style={styles.paginationBtn} onPress={handlePrev}>
+              <AntDesign name="leftcircleo" size={20} color="black" />
+            </TouchableOpacity>
+            <View style={styles.indicatorContainer}>{renderIndicator()}</View>
+            <TouchableOpacity style={styles.paginationBtn} onPress={handleNext}>
+              <AntDesign name="rightcircleo" size={20} color="black" />
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
+      </Pressable>
+    </ScrollView>
   );
 };
 
 export default MemberShipModel;
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: "flex-end", // Pushes the modal to the top of the screen
-  },
   mainView: {
+    flex: 1,
     width: Dimensions.get("screen").width,
-    height: "80%",
     backgroundColor: "#ffffff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    overflow: "hidden",
+  },
+  imageBackground: {
+    width: "100%", // Make sure the image background is as wide as the screen
+    aspectRatio: 1, // Adjust this ratio to match your image's aspect ratio
+    alignItems: "flex-start", // Align children to the top left
+    justifyContent: "flex-start", // Align children to the top
+  },
+  paging: {
+    marginVertical: 10,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  paginationBtn: {
+    padding: 5,
+    backgroundColor: "#fff",
+    elevation: 5,
+    borderRadius: 5,
+  },
+  indicatorContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginHorizontal: 5,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  activeDot: {
+    backgroundColor: "#18b623",
+  },
+  inactiveDot: {
+    backgroundColor: "#727272",
   },
 });

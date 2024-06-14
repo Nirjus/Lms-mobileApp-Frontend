@@ -3,7 +3,6 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  ToastAndroid,
   View,
   Text,
   Pressable,
@@ -12,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import RazorpayCheckout from "react-native-razorpay";
 import Header from "../../Components/Common/Header";
 import CourseInfo from "../../Components/Course/CourseInfo";
@@ -26,14 +25,17 @@ import ReviewSection from "../../Components/Course/ReviewSection";
 const CourseDetails = () => {
   const { params } = useRoute();
   const navigation = useNavigation();
-  const { update } = useSelector((state) => state.course);
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const [price, setPrice] = useState(0);
+  const { isMember: reduxMember } = useSelector((state) => state.member);
+  const { update } = useSelector((state) => state.enroll);
   const [isEnrolled, setEnrolled] = useState(false);
   const { token } = useSelector((state) => state.user);
-  const { isMember: memberExists } = useSelector((state) => state.member);
   const [course, setCourse] = useState(params?.data);
-  const [isMember, setIsMember] = useState(false);
+  const [isMember, setIsMember] = useState(true);
+
   useEffect(() => {
     const getCourse = async () => {
       try {
@@ -41,14 +43,63 @@ const CourseDetails = () => {
           .get(`/course/getCourse/${params?.data?._id}`)
           .then((res) => {
             setCourse(res.data.course);
+            dispatch({
+              type: "INIT_COURSE",
+              payload: res.data.course,
+            });
           });
       } catch (error) {
         console.log(error);
       }
     };
     getCourse();
-  }, [update]);
+  }, [params]);
 
+  useEffect(() => {
+    const checkMemberShip = async () => {
+      try {
+        await axios
+          .get("/member/check-member", {
+            headers: {
+              Authorization: token,
+            },
+          })
+          .then((res) => {
+            setIsMember(res.data.isMember);
+          })
+          .catch((error) => {
+            console.log(error.response.data.message);
+          });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    checkMemberShip();
+  }, [reduxMember]);
+  useEffect(() => {
+    const checkCompleteChapter = async () => {
+      try {
+        await axios
+          .get(`/enroll/check-complete/${course?._id}`, {
+            headers: {
+              Authorization: token,
+            },
+          })
+          .then((res) => {
+            dispatch({
+              type: "ADD_ENROLLMENT",
+              payload: res.data.enrolledCours,
+            });
+          })
+          .catch((error) => {
+            console.log(error.response.data.message);
+          });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    checkCompleteChapter();
+  }, [update]);
   useEffect(() => {
     const checkEnrollOrNot = async () => {
       try {
@@ -78,9 +129,7 @@ const CourseDetails = () => {
           "/enroll/create",
           {
             courseId: course?._id,
-            courseName: course?.name,
-            course: course,
-            price: course?.price,
+            price: price,
             paymentMode: paymentMode,
             paymentId: paymentId,
           },
@@ -104,13 +153,7 @@ const CourseDetails = () => {
       alert(error);
     }
   };
-  const returnPrice = () => {
-    if (isMember) {
-      const price = course?.price - course?.price * 0.7;
-      return price;
-    }
-    return course?.price;
-  };
+
   const checkEnrollingOfCourse = async () => {
     if (course?.price === 0) {
       const paymentId = Date.now();
@@ -123,7 +166,7 @@ const CourseDetails = () => {
           image: "https://i.imgur.com/3g7nmJC.png",
           currency: "INR",
           key: "rzp_test_hzUg2csoySkyWy", // Your api key
-          amount: returnPrice() * 100,
+          amount: price * 100,
           name: "ELearner",
           prefill: {
             email: "void@razorpay.com",
@@ -135,6 +178,9 @@ const CourseDetails = () => {
         RazorpayCheckout.open(options)
           .then((data) => {
             handleEnrollCourse("Card", data.razorpay_payment_id);
+            navigation.navigate("Review", {
+              course: course,
+            });
           })
           .catch((error) => {
             // handle failure
@@ -143,35 +189,6 @@ const CourseDetails = () => {
       } catch (error) {
         alert(error);
       }
-    }
-  };
-  useEffect(() => {
-    const checkMemberShip = async () => {
-      try {
-        await axios
-          .get("/member/check-member", {
-            headers: {
-              Authorization: token,
-            },
-          })
-          .then((res) => {
-            setIsMember(res.data.isMember);
-          });
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    checkMemberShip();
-  }, [memberExists]);
-  const onchapterPress = () => {
-    if (!isEnrolled) {
-      ToastAndroid.show("Please Enroll Course!", ToastAndroid.LONG);
-      return;
-    } else {
-      navigation.navigate("ChapterContent", {
-        course: course,
-        isEnrolled: isEnrolled,
-      });
     }
   };
 
@@ -190,20 +207,24 @@ const CourseDetails = () => {
         }
       />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <CourseInfo course={course} />
+        <CourseInfo course={course} isEnrolled={isEnrolled} />
         {/* {Sourse section} */}
         {!isMember && <SourceSection isMember={isMember} />}
         {/* {Course conrollment} */}
         <EnrollCourse
-          course={course}
+          coursePrice={course?.price}
           isEnrolled={isEnrolled}
-          isMember={isMember}
-          continueOnCourse={() =>
+          setPrice={setPrice}
+          continueOnCourse={() => {
             navigation.navigate("ChapterContent", {
-              course: course,
+              chapter: course?.chapter[0],
               isEnrolled: isEnrolled,
-            })
-          }
+            });
+            dispatch({
+              type: "SET_INDEX",
+              payload: 0,
+            });
+          }}
           checkEnrollingOfCourse={checkEnrollingOfCourse}
         />
         {/* {Lessons Sections} */}
@@ -249,11 +270,7 @@ const CourseDetails = () => {
           </Pressable>
         </Pressable>
         {page === 1 && (
-          <LessonsSection
-            course={course}
-            isEnrolled={isEnrolled}
-            onChapterSelect={() => onchapterPress()}
-          />
+          <LessonsSection course={course} isEnrolled={isEnrolled} />
         )}
         {page === 2 && <ReviewSection review={course?.reviews} />}
       </ScrollView>

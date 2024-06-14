@@ -75,7 +75,7 @@ const Header = ({ user }) => {
             <Text
               style={{
                 color: Colors.WHITE,
-                fontSize: 20,
+                fontSize: 18,
                 fontFamily: "outfit",
               }}
             >

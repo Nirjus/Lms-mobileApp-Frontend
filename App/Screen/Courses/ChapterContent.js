@@ -1,7 +1,6 @@
 import {
   Alert,
   Dimensions,
-  FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,37 +8,48 @@ import {
   ToastAndroid,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import RenderHtml from "react-native-render-html";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Video, ResizeMode } from "expo-av";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Feather, AntDesign } from "@expo/vector-icons";
 import Markdown from "react-native-markdown-display";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import Header from "../../Components/Common/Header";
-import RenderHtml from "react-native-render-html";
 import Colors from "../../utils/Colors";
-import LessonsSection from "../../Components/Course/LessonsSection";
 import ProgressBar from "../../Components/Course/progressBar";
 import Sidebar from "../../Components/Course/Sidebar";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import ReviewSection from "../../Components/Course/ReviewSection";
 import Questions from "../../Components/Course/Questions";
-import Quiz from "../../Components/Course/Quiz";
 
 const ChapterContent = () => {
   const { params } = useRoute();
   const { token, user } = useSelector((state) => state.user);
-  const { update } = useSelector((state) => state.course);
+  const { enrollData } = useSelector((state) => state.enroll);
+  const { width } = useWindowDimensions();
+  const {
+    course,
+    chapterProgressIndex,
+    update: courseUpdate,
+  } = useSelector((state) => state.course);
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const flatListRef = useRef(null);
-  const [userEnrollment, setUserEnrollment] = useState(params?.isEnrolled);
-  const [activeIndex, setActiveIndex] = useState(0);
   const [page, setPage] = useState(1);
+  const [chapter, setChapter] = useState(params?.chapter);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [course, setCourse] = useState(params?.course);
+
+  useEffect(() => {
+    if (course) {
+      const findChapter = course?.chapter?.find(
+        (ch) => ch._id === params?.chapter?._id
+      );
+      setChapter(findChapter);
+    }
+  }, [courseUpdate, params]);
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -52,14 +62,14 @@ const ChapterContent = () => {
       token: token,
     });
   };
-  const onChapterComplete = async (item) => {
+  const onChapterComplete = async () => {
     try {
       await axios
         .put(
           `/enroll/chapter-complete?courseId=${course?._id}`,
           {
-            chapterID: item?._id,
-            chapterTitle: item?.title,
+            chapterID: chapter?._id,
+            chapterTitle: chapter?.title,
           },
           {
             headers: {
@@ -72,8 +82,8 @@ const ChapterContent = () => {
           dispatch({
             type: "UPDATE_ENROLLEMENT",
           });
-          setUserInfo(res.data.user);
           if (course?.chapter?.length === res.data.chapterLength) {
+            setUserInfo(res.data.user);
             navigation.navigate("CourseCompletionSuccess");
           } else {
             ToastAndroid.showWithGravity(
@@ -90,38 +100,80 @@ const ChapterContent = () => {
       alert(error);
     }
   };
+  const isComplete = () => {
+    return enrollData?.completedChapter?.some(
+      (item) => item?.chapterID === chapter?._id
+    );
+  };
 
-  const scrollToIndex = (index) => {
-    flatListRef.current.scrollToIndex({ animated: true, index: index });
-  };
-  const handleScroll = (event) => {
-    const contentOffsetX = event.nativeEvent.contentOffset.x;
-    const viewWidth = event.nativeEvent.layoutMeasurement.width;
-    const chapterIndex = Math.floor(contentOffsetX / viewWidth);
-    setActiveIndex(chapterIndex);
-  };
-  const nextPage = (index) => {
+  const nextPage = () => {
+    const index = course?.chapter?.findIndex(
+      (item) => item._id === chapter?._id
+    );
     if (course?.chapter?.length <= index + 1) {
-      navigation.goBack();
+      navigation.navigate("CourseDetails", { data: course });
       return;
     }
-    setActiveIndex(index + 1);
-    flatListRef.current.scrollToIndex({ animated: true, index: index + 1 });
+    const item = course?.chapter[index + 1];
+    if (!params?.isEnrolled && !item?.isFree) {
+      alert("Next chapter is not free, Please Enroll Course!");
+    } else {
+      dispatch({
+        type: "SET_INDEX",
+        payload: index + 1,
+      });
+      navigation.navigate("ChapterContent", {
+        chapter: item,
+        isEnrolled: params?.isEnrolled,
+      });
+    }
   };
-  useEffect(() => {
-    const getCourse = async () => {
-      try {
-        await axios
-          .get(`/course/getCourse/${params?.course?._id}`)
-          .then((res) => {
-            setCourse(res.data.course);
-          });
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getCourse();
-  }, [update]);
+  const prevPage = () => {
+    const index = course?.chapter?.findIndex(
+      (item) => item._id === chapter?._id
+    );
+    if (index <= 0) {
+      return;
+    }
+    const item = course?.chapter[index - 1];
+    if (!params?.isEnrolled && !item?.isFree) {
+      alert("Previous chapter is not free, Please Enroll Course!");
+    } else {
+      dispatch({
+        type: "SET_INDEX",
+        payload: index - 1,
+      });
+      navigation.navigate("ChapterContent", {
+        chapter: item,
+        isEnrolled: params?.isEnrolled,
+      });
+    }
+  };
+  const quizeNavigation = () => {
+    if (!params?.isEnrolled) {
+      Alert.alert(
+        "Course not enrolled",
+        "you have to purchased the course in order to attempting the quizzes.",
+        [
+          {
+            text: "ok",
+            onPress: () => {
+              navigation.navigate("CourseDetails", { data: course });
+            },
+          },
+          {
+            text: "cancel",
+            onPress: () => {},
+          },
+        ]
+      );
+    } else {
+      navigation.navigate("QuizScreen", {
+        chapter: chapter,
+      });
+    }
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <Header
@@ -129,224 +181,304 @@ const ChapterContent = () => {
         isLeft
         component={
           <TouchableOpacity activeOpacity={0.5} onPress={() => toggleSidebar()}>
-            <Feather name="sidebar" size={30} color="black" />
+            <Feather name="sidebar" size={25} color="black" />
           </TouchableOpacity>
         }
       />
       <ScrollView showsVerticalScrollIndicator={false}>
         <ProgressBar
           contentLength={course?.chapter?.length}
-          contentIndex={activeIndex}
+          contentIndex={chapterProgressIndex}
         />
-        <FlatList
-          ref={flatListRef}
-          data={course?.chapter}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item, index }) => (
-            <View
-              key={item?._id}
+        <View
+          style={{
+            width: Dimensions.get("screen").width,
+            minHeight: Dimensions.get("screen").height - 120,
+            position: "relative",
+          }}
+        >
+          <Video
+            // ref={video}
+            style={styles.video}
+            source={{
+              uri: chapter?.video.url,
+            }}
+            useNativeControls
+            resizeMode={ResizeMode.CONTAIN}
+            isLooping
+            // onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+          />
+          <View style={styles.infoSection}>
+            <Text
               style={{
-                width: Dimensions.get("screen").width,
-                position: "relative",
+                fontFamily: "outfit-semibold",
+                fontSize: 18,
+                color: "#000",
+                flex: 1,
               }}
             >
-              {item?.video?.url && (
-                <Video
-                  // ref={video}
-                  style={styles.video}
-                  source={{
-                    uri: item?.video.url,
-                  }}
-                  useNativeControls
-                  resizeMode={ResizeMode.CONTAIN}
-                  isLooping
-                  // onPlaybackStatusUpdate={(status) => setStatus(() => status)}
-                />
+              {chapter?.title}
+            </Text>
+          </View>
+
+          <View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => prevPage()}
+                style={[
+                  styles.nextBtn,
+                  course?.chapter[0]._id === chapter?._id && {
+                    opacity: 0.7,
+                  },
+                ]}
+              >
+                <Feather name="arrow-left-circle" size={24} color="#686767" />
+              </TouchableOpacity>
+              {params?.isEnrolled && (
+                <>
+                  {chapter?.quiz?.length === 0 && !isComplete() && (
+                    <Pressable
+                      onPress={() => onChapterComplete()}
+                      style={styles.markAsCompleted}
+                    >
+                      <Text
+                        style={{
+                          fontFamily: "outfit",
+                          fontSize: 12,
+                          color: Colors.WHITE,
+                        }}
+                      >
+                        Mark as Completed
+                      </Text>
+                    </Pressable>
+                  )}
+                  {isComplete() && (
+                    <Pressable
+                      onPress={() => {}}
+                      style={[
+                        styles.markAsCompleted,
+                        { backgroundColor: "#cefcdb", flexDirection: "row" },
+                      ]}
+                    >
+                      <AntDesign
+                        name="checkcircleo"
+                        size={20}
+                        color="#1eca46"
+                      />
+                      <Text
+                        style={{
+                          fontFamily: "outfit",
+                          fontSize: 13,
+                          color: "#1eca46",
+                        }}
+                      >
+                        Completed
+                      </Text>
+                    </Pressable>
+                  )}
+                </>
               )}
-              <View style={styles.infoSection}>
-                <Text
-                  style={{
-                    fontFamily: "outfit-bold",
-                    fontSize: 20,
-                    color: "#000",
-                    flex: 1,
-                  }}
-                >
-                  {item?.title}
-                </Text>
-
-                {item?.title !== "Quiz" && (
-                  <Pressable
-                    onPress={() => onChapterComplete(item)}
-                    style={styles.markAsCompleted}
-                  >
-                    <Text
-                      style={{
-                        fontFamily: "outfit",
-                        fontSize: 12,
-                        color: Colors.WHITE,
-                      }}
-                    >
-                      Mark as Completed
-                    </Text>
-                  </Pressable>
-                )}
-              </View>
-              {item?.title !== "Quiz" && (
-                <View>
-                  <TouchableOpacity
-                    onPress={() => nextPage(index)}
-                    style={styles.nextBtn}
-                  >
-                    <Text
-                      style={{
-                        color: Colors.WHITE,
-                        textAlign: "center",
-                        fontFamily: "outfit-semibold",
-                        fontSize: 16,
-                      }}
-                    >
-                      {course?.chapter?.length <= index + 1 ? "Finish" : "Next"}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <Pressable
+              <TouchableOpacity
+                onPress={() => nextPage()}
+                style={styles.nextBtn}
+              >
+                {course?.chapter[course?.chapter?.length - 1]._id ===
+                chapter?._id ? (
+                  <Text
                     style={{
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: 10,
+                      color: "#000",
+                      textAlign: "center",
+                      fontFamily: "outfit-semibold",
+                      fontSize: 15,
                     }}
                   >
-                    <Pressable
-                      style={[
-                        styles.btn,
-                        page === 1
-                          ? {
-                              borderBottomWidth: 2,
-                              borderBottomColor: "#727272",
-                            }
-                          : {
-                              borderBottomWidth: 0,
-                            },
-                      ]}
-                      onPress={() => setPage(1)}
-                    >
-                      <Text style={styles.txt}>Overview</Text>
-                    </Pressable>
-                    <Pressable
-                      style={[
-                        styles.btn,
-                        page === 2
-                          ? {
-                              borderBottomWidth: 2,
-                              borderBottomColor: "#727272",
-                            }
-                          : {
-                              borderBottomWidth: 0,
-                            },
-                      ]}
-                      onPress={() => setPage(2)}
-                    >
-                      <Text style={styles.txt}>Q&A</Text>
-                    </Pressable>
-                    <Pressable
-                      style={[
-                        styles.btn,
-                        page === 3
-                          ? {
-                              borderBottomWidth: 2,
-                              borderBottomColor: "#727272",
-                            }
-                          : {
-                              borderBottomWidth: 0,
-                            },
-                      ]}
-                      onPress={() => setPage(3)}
-                    >
-                      <Text style={styles.txt}>Reviews</Text>
-                    </Pressable>
-                  </Pressable>
-
-                  {page === 1 && (
-                    <View>
-                      <View
-                        style={[
-                          styles.contentSection,
-                          { backgroundColor: Colors.WHITE },
-                        ]}
-                      >
-                        <Text
-                          style={{
-                            fontFamily: "outfit-semibold",
-                            fontSize: 15,
-                          }}
-                        >
-                          Content:
-                        </Text>
-                        <Text style={{ color: Colors.BLACK }}>
-                          {item?.content}
-                        </Text>
-                      </View>
-                      <View style={styles.contentSection}>
-                        <Text style={{ color: Colors.BLACK }}>
-                          {item?.output}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                  {page === 2 && (
-                    <View>
-                      <Questions
-                        user={user}
-                        token={token}
-                        chapter={item}
-                        course={course}
-                      />
-                    </View>
-                  )}
-                  {page === 3 && (
-                    <ReviewSection
-                      review={course?.reviews}
-                      course={course}
-                      setCourse={setCourse}
-                      isChapter
-                    />
-                  )}
-                </View>
-              )}
-              {item?.title === "Quiz" && (
-                <Quiz
-                  quiz={item?.quiz}
-                  onChapterComplete={() => onChapterComplete(item)}
-                />
-              )}
+                    Finish
+                  </Text>
+                ) : (
+                  <Feather
+                    name="arrow-right-circle"
+                    size={24}
+                    color="#686767"
+                  />
+                )}
+              </TouchableOpacity>
             </View>
-          )}
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-          keyExtractor={(item, index) => index.toString()}
-        />
-        {isSidebarOpen && (
-          <View
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              height: "100%",
-              width: "100%",
-            }}
-          >
-            <Sidebar
-              course={course}
-              isEnrolled={userEnrollment}
-              onChapterSelect={(index) => scrollToIndex(index)}
-              selectedChapter={course?.chapter[activeIndex]}
-              onClose={() => setIsSidebarOpen(false)}
-            />
+
+            <Pressable
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <Pressable
+                style={[
+                  styles.btn,
+                  page === 1
+                    ? {
+                        borderBottomWidth: 2,
+                        borderBottomColor: "#727272",
+                      }
+                    : {
+                        borderBottomWidth: 0,
+                      },
+                ]}
+                onPress={() => setPage(1)}
+              >
+                <Text style={styles.txt}>Overview</Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.btn,
+                  page === 2
+                    ? {
+                        borderBottomWidth: 2,
+                        borderBottomColor: "#727272",
+                      }
+                    : {
+                        borderBottomWidth: 0,
+                      },
+                ]}
+                onPress={() => setPage(2)}
+              >
+                <Text style={styles.txt}>Discuss</Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.btn,
+                  page === 3
+                    ? {
+                        borderBottomWidth: 2,
+                        borderBottomColor: "#727272",
+                      }
+                    : {
+                        borderBottomWidth: 0,
+                      },
+                ]}
+                onPress={() => setPage(3)}
+              >
+                <Text style={styles.txt}>Quiz</Text>
+              </Pressable>
+            </Pressable>
+
+            {page === 1 && (
+              <View>
+                <View
+                  style={[
+                    styles.contentSection,
+                    { backgroundColor: Colors.WHITE },
+                  ]}
+                >
+                  <Text
+                    style={{
+                      fontFamily: "outfit-semibold",
+                      fontSize: 15,
+                    }}
+                  >
+                    Content:
+                  </Text>
+                  <RenderHtml
+                    contentWidth={width}
+                    source={{ html: chapter?.content }}
+                    tagsStyles={tagstyle}
+                  />
+                </View>
+                <View style={styles.contentSection}>
+                  <RenderHtml
+                    contentWidth={width}
+                    source={{ html: chapter?.output }}
+                    tagsStyles={tagstyle}
+                  />
+                </View>
+              </View>
+            )}
+            {page === 2 && (
+              <View>
+                <Questions
+                  user={user}
+                  token={token}
+                  chapterId={chapter?._id}
+                  courseId={course?._id}
+                />
+              </View>
+            )}
+            {page === 3 && (
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: Colors.WHITE,
+                  marginHorizontal: 10,
+                  borderRadius: 10,
+                }}
+              >
+                {chapter?.quiz?.length === 0 ? (
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      fontSize: 14,
+                      marginVertical: 20,
+                      fontStyle: "italic",
+                    }}
+                  >
+                    No quiz have in this chapter
+                  </Text>
+                ) : (
+                  <View style={{ marginTop: 10 }}>
+                    <Text style={{ fontSize: 14, fontWeight: "500" }}>
+                      You have to carefully watch thie video tutorial, before
+                      attempt the quizzes,
+                    </Text>
+                    <View
+                      style={{
+                        borderWidth: 1,
+                        borderColor: "#dadada",
+                        marginVertical: 20,
+                      }}
+                    />
+                    <Text style={{ fontSize: 13, color: "#626262" }}>
+                      You have to successfully attempts {chapter?.quiz?.length}{" "}
+                      quiz to complete this chapter
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.quizButton}
+                      onPress={() => quizeNavigation()}
+                    >
+                      <Text
+                        style={{
+                          color: Colors.WHITE,
+                          textAlign: "center",
+                          fontFamily: "outfit-semibold",
+                          fontSize: 15,
+                        }}
+                      >
+                        Lets start
+                      </Text>
+                      <AntDesign
+                        name="arrowright"
+                        size={20}
+                        color={Colors.WHITE}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            )}
           </View>
+        </View>
+
+        {isSidebarOpen && (
+          <Sidebar
+            course={course}
+            isEnrolled={params?.isEnrolled}
+            onClose={() => setIsSidebarOpen(false)}
+          />
         )}
       </ScrollView>
     </View>
@@ -370,11 +502,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   markAsCompleted: {
-    padding: 5,
-    backgroundColor: Colors.SECONDARY,
-    paddingHorizontal: 8,
+    backgroundColor: "#8491fe",
+    height: 40,
+    justifyContent: "center",
+    columnGap: 10,
+    alignItems: "center",
+    borderRadius: 5,
+    paddingHorizontal: 10,
   },
   contentSection: {
+    flex: 1,
     paddingHorizontal: 10,
     marginHorizontal: 10,
     backgroundColor: "#cbcbcb",
@@ -383,11 +520,14 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   nextBtn: {
-    padding: 15,
-    backgroundColor: Colors.PRIMARY,
-    borderRadius: 10,
-    marginVertical: 10,
-    marginHorizontal: 10,
+    elevation: 5,
+    backgroundColor: Colors.WHITE,
+    borderRadius: 5,
+    margin: 10,
+    width: 70,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
   btn: {
     width: 100,
@@ -400,12 +540,23 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: Colors.BLACK,
   },
+  quizButton: {
+    padding: 10,
+    width: 150,
+    backgroundColor: "#7d81fb",
+    borderRadius: 5,
+    marginVertical: 20,
+    flexDirection: "row",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    columnGap: 10,
+  },
 });
 
 const tagstyle = {
   body: {
     fontFamily: "outfit",
-    fontSize: 16,
   },
   code: {
     backgroundColor: Colors.BLACK,

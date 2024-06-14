@@ -49,6 +49,7 @@ export const pdfTemplate = (
     .certificate-body {
       text-align: left;
       margin-bottom: 30px;
+      padding: 10px;
     }
     .certificate-text {
       font-size: 15px;
@@ -74,17 +75,33 @@ export const pdfTemplate = (
       font-size: 14px;
       color: #777;
     }
+     .certificate-header .logowithheading{
+        display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    align-items: center;
+      }
+      .certificate-header .logostyle {
+        width: 50px,
+        height: 50px,
+         object-fit: contain;
+      }
   </style>
 </head>
 <body>
   <div class="certificate">
     <div class="certificate-header">
-      <h1 class="titleLogo">E Learner</h1>
+      <div class="logowithheading">
+      <img src="https://res.cloudinary.com/dux3nrcwg/image/upload/v1718177083/adaptive-icon_gfvetr.png" alt="logo" class="logostyle" />
+        <h1 class="titleLogo">E Learner</h1>
+        </div>
+      <div>
       <h1>Certificate of Completion</h1>
     </div>
     <div class="certificate-body">
       <p class="certificate-text">This is to certify that <strong>${name}</strong> has successfully completed the course <strong>"${courseName}"</strong>.</p>
-      <p class="certificate-text">Duration of Course: <strong>${totalTime} hours</strong></p>
+      <p class="certificate-text">Duration of Course: <strong>${totalTime}</strong></p>
       <p class="certificate-text">Date of Completion: <strong>${completeDate}</strong></p>
       <p class="certificate-text">Throughout the duration of the course, ${name} has demonstrated exceptional dedication, perseverance, and enthusiasm in mastering the concepts and techniques of ${courseName} course.</p>
       <p class="certificate-text">${name} consistently engaged in all course activities, including lectures, assignments, and projects, with a high level of commitment and professionalism.</p>

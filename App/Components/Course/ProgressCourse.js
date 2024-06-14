@@ -1,25 +1,28 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useEffect } from "react";
+import React from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import Colors from "../../utils/Colors";
 import ProgressBar from "../Common/ProgressBar";
 
-const ProgressCourse = ({ item, completedChapter }) => {
+const ProgressCourse = ({ item, completedChapter, paymentInfo }) => {
   const navigation = useNavigation();
-  //   totalChapter
-
   // complete chapter
   const calculatePerComplete = () => {
     const persentage = completedChapter?.length / item?.chapter?.length;
 
     return persentage.toFixed(2);
   };
+  const enrolledCourse = {
+    item,
+    completedChapter,
+    paymentInfo,
+  };
   return (
     <TouchableOpacity
       style={styles.courseCard}
       onPress={() => {
-        navigation.navigate("CourseDetails", { data: item });
+        navigation.navigate("CourseProgress", { data: enrolledCourse });
       }}
     >
       <Image
@@ -58,7 +61,7 @@ const ProgressCourse = ({ item, completedChapter }) => {
                 color: Colors.LIGHT_PRIMARY,
               }}
             >
-              {item.author}
+              {item?.author}
             </Text>
             {item?.chapter?.length !== 0 && (
               <View
